@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="UniversityManagement.Data.Tests/UniversityManagement.Data.Tests.csproj" />
+  <Project Path="UniversityManagement.Data/UniversityManagement.Data.csproj" />
+  <Project Path="UniversityManagement.Domain.Tests/UniversityManagement.Domain.Tests.csproj" />
+  <Project Path="UniversityManagement.Domain/UniversityManagement.Domain.csproj" />
+  <Project Path="UniversityManagement.Services.Tests/UniversityManagement.Services.Tests.csproj" />
+  <Project Path="UniversityManagement.Services/UniversityManagement.Services.csproj" />
+</Solution>
