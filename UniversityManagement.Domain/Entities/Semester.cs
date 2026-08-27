@@ -26,6 +26,8 @@ public class Semester
 
     public void AddCourse(Course course)
     {
+        ArgumentNullException.ThrowIfNull(course);
+
         if (_courses.Contains(course))
             throw new ArgumentException("Course is already added to this semester.");
 

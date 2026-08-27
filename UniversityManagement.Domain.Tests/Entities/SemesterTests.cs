@@ -165,4 +165,13 @@ public class SemesterTests
 
         Assert.False(semester.HasEnoughAvailableCredits);
     }
+
+    [Fact]
+    public void Semester_ShouldRejectNullCourse()
+    {
+        var semester = new Semester(1, 30);
+
+        Assert.Throws<ArgumentNullException>(() =>
+            semester.AddCourse(null!));
+    }
 }
