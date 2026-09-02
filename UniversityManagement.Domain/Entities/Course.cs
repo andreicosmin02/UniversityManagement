@@ -9,6 +9,8 @@ namespace UniversityManagement.Domain.Entities;
 /// </summary>
 public class Course
 {
+    private readonly List<Prerequisite> prerequisites = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Course"/> class.
     /// </summary>
@@ -83,4 +85,36 @@ public class Course
     /// Gets the total course cost.
     /// </summary>
     public decimal Cost { get; }
+
+    /// <summary>
+    /// Gets the prerequisites required for this course.
+    /// </summary>
+    public IReadOnlyCollection<Prerequisite> Prerequisites => this.prerequisites;
+
+    /// <summary>
+    /// Adds a prerequisite to the course.
+    /// </summary>
+    /// <param name="prerequisite">The prerequisite to add.</param>
+    public void AddPrerequisite(Prerequisite prerequisite)
+    {
+        ArgumentNullException.ThrowIfNull(prerequisite);
+
+        if (prerequisite.RequiredCourse == this)
+        {
+            throw new ArgumentException(
+                "A course cannot be its own prerequisite.",
+                nameof(prerequisite));
+        }
+
+        if (this.prerequisites.Exists(
+            existingPrerequisite =>
+                existingPrerequisite.RequiredCourse == prerequisite.RequiredCourse))
+        {
+            throw new ArgumentException(
+                "The required course is already a prerequisite.",
+                nameof(prerequisite));
+        }
+
+        this.prerequisites.Add(prerequisite);
+    }
 }

@@ -155,5 +155,161 @@ namespace UniversityManagement.Domain.Tests.Entities
 
             Assert.Equal(cost, course.Cost);
         }
+
+        /// <summary>
+        /// Verifies that a prerequisite can be added to a course.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldAddPrerequisite()
+        {
+            var requiredCourse = new Course(
+                "Programare",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var course = new Course(
+                "Algoritmi",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var prerequisite = new Prerequisite(requiredCourse, 7);
+
+            course.AddPrerequisite(prerequisite);
+
+            Assert.Contains(prerequisite, course.Prerequisites);
+        }
+
+        /// <summary>
+        /// Verifies that the same prerequisite course cannot be added twice.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldRejectDuplicatePrerequisite()
+        {
+            var requiredCourse = new Course(
+                "Programare",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var course = new Course(
+                "Algoritmi",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var prerequisite = new Prerequisite(requiredCourse, 7);
+
+            course.AddPrerequisite(prerequisite);
+
+            Assert.Throws<ArgumentException>(
+                () => course.AddPrerequisite(prerequisite));
+        }
+
+        /// <summary>
+        /// Verifies that a null prerequisite cannot be added to a course.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldRejectNullPrerequisite()
+        {
+            var course = new Course(
+                "Algoritmi",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            Assert.Throws<ArgumentNullException>(
+                () => course.AddPrerequisite(null!));
+        }
+
+        /// <summary>
+        /// Verifies that a course cannot require itself as a prerequisite.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldRejectItselfAsPrerequisite()
+        {
+            var course = new Course(
+                "Algoritmi",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var prerequisite = new Prerequisite(course, 7);
+
+            Assert.Throws<ArgumentException>(
+                () => course.AddPrerequisite(prerequisite));
+        }
+
+        /// <summary>
+        /// Verifies that two prerequisite objects for the same required course are rejected.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldRejectDuplicateRequiredCourse()
+        {
+            var requiredCourse = new Course(
+                "Programare",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var course = new Course(
+                "Algoritmi",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var firstPrerequisite = new Prerequisite(requiredCourse, 5);
+            var secondPrerequisite = new Prerequisite(requiredCourse, 7);
+
+            course.AddPrerequisite(firstPrerequisite);
+
+            Assert.Throws<ArgumentException>(
+                () => course.AddPrerequisite(secondPrerequisite));
+        }
+
+        /// <summary>
+        /// Verifies that different prerequisite courses can be added.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldAllowDifferentPrerequisiteCourses()
+        {
+            var programming = new Course(
+                "Programare",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var mathematics = new Course(
+                "Matematica",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var course = new Course(
+                "Algoritmi",
+                "Descriere",
+                5,
+                100m,
+                750m);
+
+            var programmingPrerequisite = new Prerequisite(programming, 7);
+            var mathematicsPrerequisite = new Prerequisite(mathematics, 6);
+
+            course.AddPrerequisite(programmingPrerequisite);
+            course.AddPrerequisite(mathematicsPrerequisite);
+
+            Assert.Equal(2, course.Prerequisites.Count);
+        }
     }
 }
