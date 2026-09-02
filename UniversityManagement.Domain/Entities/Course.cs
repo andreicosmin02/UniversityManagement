@@ -9,7 +9,7 @@ namespace UniversityManagement.Domain.Entities;
 /// </summary>
 public class Course
 {
-    private readonly List<Prerequisite> prerequisites = new();
+    private readonly List<Prerequisite> prerequisites = new ();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Course"/> class.
