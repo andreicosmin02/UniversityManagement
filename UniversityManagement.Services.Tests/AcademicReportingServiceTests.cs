@@ -127,4 +127,85 @@ public class AcademicReportingServiceTests
             new[] { "0722123456" },
             Array.Empty<string>());
     }
+
+    /// <summary>
+    /// Verifies that students who passed all selected courses are counted as integral students.
+    /// </summary>
+    [Fact]
+    public void GetIntegralStudentCount_ShouldCountStudentsWhoPassedAllSelectedCourses()
+    {
+        var studentA = CreateStudent("S001");
+        var studentB = CreateStudent("S002");
+
+        var courseA = new Course("A", "Course A", 5, 100m, 500m);
+        var courseB = new Course("B", "Course B", 5, 100m, 500m);
+        var semester = new Semester(1, 0);
+
+        var enrollments = new[]
+        {
+        new Enrollment(studentA, courseA, semester),
+        new Enrollment(studentA, courseB, semester),
+        new Enrollment(studentB, courseA, semester),
+    };
+
+        var attemptsByStudent =
+            new Dictionary<Student, IEnumerable<ExamAttempt>>
+            {
+                [studentA] = new[]
+                {
+                new ExamAttempt(courseA, 7, new DateTime(2026, 6, 1)),
+                new ExamAttempt(courseB, 5, new DateTime(2026, 6, 2)),
+                },
+                [studentB] = new[]
+                {
+                new ExamAttempt(courseA, 4, new DateTime(2026, 6, 1)),
+                },
+            };
+
+        var service = new AcademicReportingService();
+
+        var count = service.GetIntegralStudentCount(
+            new[] { studentA, studentB },
+            enrollments,
+            attemptsByStudent);
+
+        Assert.Equal(1, count);
+    }
+
+    /// <summary>
+    /// Verifies that a missing exam for a selected course prevents integral status.
+    /// </summary>
+    [Fact]
+    public void GetIntegralStudentCount_ShouldRejectStudentWithMissingPassedCourse()
+    {
+        var student = CreateStudent("S001");
+
+        var courseA = new Course("A", "Course A", 5, 100m, 500m);
+        var courseB = new Course("B", "Course B", 5, 100m, 500m);
+        var semester = new Semester(1, 0);
+
+        var enrollments = new[]
+        {
+        new Enrollment(student, courseA, semester),
+        new Enrollment(student, courseB, semester),
+    };
+
+        var attemptsByStudent =
+            new Dictionary<Student, IEnumerable<ExamAttempt>>
+            {
+                [student] = new[]
+                {
+                new ExamAttempt(courseA, 8, new DateTime(2026, 6, 1)),
+                },
+            };
+
+        var service = new AcademicReportingService();
+
+        var count = service.GetIntegralStudentCount(
+            new[] { student },
+            enrollments,
+            attemptsByStudent);
+
+        Assert.Equal(0, count);
+    }
 }

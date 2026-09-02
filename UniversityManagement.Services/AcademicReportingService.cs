@@ -88,4 +88,47 @@ public class AcademicReportingService
             .GroupBy(enrollment => enrollment.Student)
             .Average(group => (decimal)group.Count());
     }
+
+    /// <summary>
+    /// Gets the number of students who passed all courses they selected.
+    /// </summary>
+    /// <param name="students">The students to evaluate.</param>
+    /// <param name="enrollments">The existing enrollments.</param>
+    /// <param name="attemptsByStudent">The exam attempts grouped by student.</param>
+    /// <returns>The number of integral students.</returns>
+    public int GetIntegralStudentCount(
+        IEnumerable<Student> students,
+        IEnumerable<Enrollment> enrollments,
+        IReadOnlyDictionary<Student, IEnumerable<ExamAttempt>> attemptsByStudent)
+    {
+        ArgumentNullException.ThrowIfNull(students);
+        ArgumentNullException.ThrowIfNull(enrollments);
+        ArgumentNullException.ThrowIfNull(attemptsByStudent);
+
+        var enrollmentList = enrollments.ToList();
+
+        return students.Count(student =>
+        {
+            var selectedCourses = enrollmentList
+                .Where(enrollment => ReferenceEquals(enrollment.Student, student))
+                .Select(enrollment => enrollment.Course)
+                .ToList();
+
+            if (selectedCourses.Count == 0)
+            {
+                return false;
+            }
+
+            if (!attemptsByStudent.TryGetValue(student, out var examAttempts))
+            {
+                return false;
+            }
+
+            return selectedCourses.All(
+                course => examAttempts.Any(
+                    attempt =>
+                        ReferenceEquals(attempt.Course, course)
+                        && attempt.Passed));
+        });
+    }
 }
