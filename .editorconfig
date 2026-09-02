@@ -1,0 +1,15 @@
+root = true
+
+[*.{cs,vb}]
+
+# Indentation and spacing
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Prefer placing using directives inside the namespace (StyleCop default)
+csharp_using_directive_placement = inside_namespace
+
+# Put System directives first
+dotnet_sort_system_directives_first = true

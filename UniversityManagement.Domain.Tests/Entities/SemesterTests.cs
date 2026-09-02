@@ -1,177 +1,221 @@
-﻿using UniversityManagement.Domain.Entities;
-using Xunit;
+﻿// <copyright file="SemesterTests.cs" company="Universitatea Transilvania">
+// Copyright (c) Universitatea Transilvania. All rights reserved.
+// </copyright>
 
-namespace UniversityManagement.Domain.Tests.Entities;
-
-public class SemesterTests
+namespace UniversityManagement.Domain.Tests.Entities
 {
-    [Fact]
-    public void Semester_ShouldStoreNumberAndMinimumCredits()
+    using UniversityManagement.Domain.Entities;
+    using Xunit;
+
+    /// <summary>
+    /// Unit tests for the Semester entity.
+    /// </summary>
+    public class SemesterTests
     {
-        var semester = new Semester(1, 30);
+        /// <summary>
+        /// Verifies that number and minimum credits are stored.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldStoreNumberAndMinimumCredits()
+        {
+            var semester = new Semester(1, 30);
 
-        Assert.Equal(1, semester.Number);
-        Assert.Equal(30, semester.MinimumCredits);
-    }
+            Assert.Equal(1, semester.Number);
+            Assert.Equal(30, semester.MinimumCredits);
+        }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Semester_ShouldRejectNonPositiveNumber(int number)
-    {
-        Assert.Throws<ArgumentException>(() =>
-            new Semester(number, 30));
-    }
+        /// <summary>
+        /// Verifies non-positive semester numbers are rejected.
+        /// </summary>
+        /// <param name="number">The semester number to test.</param>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void Semester_ShouldRejectNonPositiveNumber(int number)
+        {
+            Assert.Throws<ArgumentException>(() =>
+                new Semester(number, 30));
+        }
 
-    [Fact]
-    public void Semester_ShouldRejectNegativeMinimumCredits()
-    {
-        Assert.Throws<ArgumentException>(() =>
-            new Semester(1, -1));
-    }
+        /// <summary>
+        /// Verifies negative minimum credits are rejected.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldRejectNegativeMinimumCredits()
+        {
+            Assert.Throws<ArgumentException>(() =>
+                new Semester(1, -1));
+        }
 
-    [Fact]
-    public void Semester_ShouldAcceptZeroMinimumCredits()
-    {
-        var semester = new Semester(1, 0);
+        /// <summary>
+        /// Verifies zero minimum credits are accepted.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldAcceptZeroMinimumCredits()
+        {
+            var semester = new Semester(1, 0);
 
-        Assert.Equal(0, semester.MinimumCredits);
-    }
+            Assert.Equal(0, semester.MinimumCredits);
+        }
 
-    [Fact]
-    public void Semester_ShouldAddCourse()
-    {
-        var semester = new Semester(1, 30);
-        var course = new Course(
-            "Programming",
-            "Introduction to programming",
-            5,
-            100m,
-            500m);
+        /// <summary>
+        /// Verifies a course can be added to a semester.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldAddCourse()
+        {
+            var semester = new Semester(1, 30);
+            var course = new Course(
+                "Programming",
+                "Introduction to programming",
+                5,
+                100m,
+                500m);
 
-        semester.AddCourse(course);
+            semester.AddCourse(course);
 
-        Assert.Contains(course, semester.Courses);
-    }
+            Assert.Contains(course, semester.Courses);
+        }
 
-    [Fact]
-    public void Semester_ShouldRejectAddingSameCourseTwice()
-    {
-        var semester = new Semester(1, 30);
-        var course = new Course(
-            "Programming",
-            "Introduction to programming",
-            5,
-            100m,
-            500m);
+        /// <summary>
+        /// Verifies adding the same course twice is rejected.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldRejectAddingSameCourseTwice()
+        {
+            var semester = new Semester(1, 30);
+            var course = new Course(
+                "Programming",
+                "Introduction to programming",
+                5,
+                100m,
+                500m);
 
-        semester.AddCourse(course);
+            semester.AddCourse(course);
 
-        Assert.Throws<ArgumentException>(() =>
-            semester.AddCourse(course));
-    }
+            Assert.Throws<ArgumentException>(() =>
+                semester.AddCourse(course));
+        }
 
-    [Fact]
-    public void Course_ShouldBeAllowedInMultipleSemesters()
-    {
-        var firstSemester = new Semester(1, 30);
-        var secondSemester = new Semester(2, 30);
-        var course = new Course(
-            "Programming",
-            "Introduction to programming",
-            5,
-            100m,
-            500m);
+        /// <summary>
+        /// Verifies a course can belong to multiple semesters.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldBeAllowedInMultipleSemesters()
+        {
+            var firstSemester = new Semester(1, 30);
+            var secondSemester = new Semester(2, 30);
+            var course = new Course(
+                "Programming",
+                "Introduction to programming",
+                5,
+                100m,
+                500m);
 
-        firstSemester.AddCourse(course);
-        secondSemester.AddCourse(course);
+            firstSemester.AddCourse(course);
+            secondSemester.AddCourse(course);
 
-        Assert.Contains(course, firstSemester.Courses);
-        Assert.Contains(course, secondSemester.Courses);
-    }
+            Assert.Contains(course, firstSemester.Courses);
+            Assert.Contains(course, secondSemester.Courses);
+        }
 
+        /// <summary>
+        /// Verifies total credits are zero when no courses are present.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldHaveZeroTotalCreditsWhenItHasNoCourses()
+        {
+            var semester = new Semester(1, 30);
 
-    [Fact]
-    public void Semester_ShouldHaveZeroTotalCreditsWhenItHasNoCourses()
-    {
-        var semester = new Semester(1, 30);
+            Assert.Equal(0, semester.TotalAvailableCredits);
+        }
 
-        Assert.Equal(0, semester.TotalAvailableCredits);
-    }
+        /// <summary>
+        /// Verifies calculation of total available credits.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldCalculateTotalAvailableCredits()
+        {
+            var semester = new Semester(1, 30);
 
-    [Fact]
-    public void Semester_ShouldCalculateTotalAvailableCredits()
-    {
-        var semester = new Semester(1, 30);
+            var programming = new Course(
+                "Programming",
+                "Introduction to programming",
+                5,
+                100m,
+                500m);
 
-        var programming = new Course(
-            "Programming",
-            "Introduction to programming",
-            5,
-            100m,
-            500m);
+            var databases = new Course(
+                "Databases",
+                "Introduction to databases",
+                6,
+                100m,
+                600m);
 
-        var databases = new Course(
-            "Databases",
-            "Introduction to databases",
-            6,
-            100m,
-            600m);
+            semester.AddCourse(programming);
+            semester.AddCourse(databases);
 
-        semester.AddCourse(programming);
-        semester.AddCourse(databases);
+            Assert.Equal(11, semester.TotalAvailableCredits);
+        }
 
-        Assert.Equal(11, semester.TotalAvailableCredits);
-    }
+        /// <summary>
+        /// Verifies threshold behavior for minimum credits met.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldMeetMinimumCreditsWhenAvailableCreditsReachThreshold()
+        {
+            var semester = new Semester(1, 10);
 
-    [Fact]
-    public void Semester_ShouldMeetMinimumCreditsWhenAvailableCreditsReachThreshold()
-    {
-        var semester = new Semester(1, 10);
+            var programming = new Course(
+                "Programming",
+                "Introduction to programming",
+                5,
+                100m,
+                500m);
 
-        var programming = new Course(
-            "Programming",
-            "Introduction to programming",
-            5,
-            100m,
-            500m);
+            var databases = new Course(
+                "Databases",
+                "Introduction to databases",
+                5,
+                100m,
+                500m);
 
-        var databases = new Course(
-            "Databases",
-            "Introduction to databases",
-            5,
-            100m,
-            500m);
+            semester.AddCourse(programming);
+            semester.AddCourse(databases);
 
-        semester.AddCourse(programming);
-        semester.AddCourse(databases);
+            Assert.True(semester.HasEnoughAvailableCredits);
+        }
 
-        Assert.True(semester.HasEnoughAvailableCredits);
-    }
+        /// <summary>
+        /// Verifies when available credits are below threshold the flag is false.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldNotMeetMinimumCreditsWhenAvailableCreditsAreBelowThreshold()
+        {
+            var semester = new Semester(1, 10);
 
-    [Fact]
-    public void Semester_ShouldNotMeetMinimumCreditsWhenAvailableCreditsAreBelowThreshold()
-    {
-        var semester = new Semester(1, 10);
+            var programming = new Course(
+                "Programming",
+                "Introduction to programming",
+                5,
+                100m,
+                500m);
 
-        var programming = new Course(
-            "Programming",
-            "Introduction to programming",
-            5,
-            100m,
-            500m);
+            semester.AddCourse(programming);
 
-        semester.AddCourse(programming);
+            Assert.False(semester.HasEnoughAvailableCredits);
+        }
 
-        Assert.False(semester.HasEnoughAvailableCredits);
-    }
+        /// <summary>
+        /// Verifies adding a null course throws ArgumentNullException.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldRejectNullCourse()
+        {
+            var semester = new Semester(1, 30);
 
-    [Fact]
-    public void Semester_ShouldRejectNullCourse()
-    {
-        var semester = new Semester(1, 30);
-
-        Assert.Throws<ArgumentNullException>(() =>
-            semester.AddCourse(null!));
+            Assert.Throws<ArgumentNullException>(() =>
+                semester.AddCourse(null!));
+        }
     }
 }
