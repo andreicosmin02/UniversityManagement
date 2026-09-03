@@ -90,7 +90,7 @@ public class Course
     /// <summary>
     /// Gets the persistent identifier of the course, when available.
     /// </summary>
-    public int? Id { get; }
+    public int Id { get; private set; }
 
     /// <summary>
     /// Gets the course name.

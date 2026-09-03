@@ -116,18 +116,6 @@ public class AcademicReportingServiceTests
         Assert.Equal(1.5m, average);
     }
 
-    private static Student CreateStudent(string registrationNumber)
-    {
-        return new Student(
-            "Ion",
-            "Popescu",
-            "Brasov",
-            "1234567890123",
-            registrationNumber,
-            new[] { "0722123456" },
-            Array.Empty<string>());
-    }
-
     /// <summary>
     /// Verifies that students who passed all selected courses are counted as integral students.
     /// </summary>
@@ -207,5 +195,17 @@ public class AcademicReportingServiceTests
             attemptsByStudent);
 
         Assert.Equal(0, count);
+    }
+
+    private static Student CreateStudent(string registrationNumber)
+    {
+        return new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            registrationNumber,
+            new[] { "0722123456" },
+            Array.Empty<string>());
     }
 }

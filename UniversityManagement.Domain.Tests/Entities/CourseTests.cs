@@ -347,5 +347,21 @@ namespace UniversityManagement.Domain.Tests.Entities
                     100m,
                     500m));
         }
+
+        /// <summary>
+        /// Verifies that a new course starts without an assigned persistent identifier.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldStartWithUnassignedId()
+        {
+            var course = new Course(
+                "Programming",
+                "Introduction to programming.",
+                5,
+                100m,
+                500m);
+
+            Assert.Equal(0, course.Id);
+        }
     }
 }
