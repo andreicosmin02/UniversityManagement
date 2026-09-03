@@ -311,5 +311,41 @@ namespace UniversityManagement.Domain.Tests.Entities
 
             Assert.Equal(2, course.Prerequisites.Count);
         }
+
+        /// <summary>
+        /// Verifies that a course stores its identifier.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldStoreId()
+        {
+            var course = new Course(
+                42,
+                "Programming",
+                "Introduction to programming.",
+                5,
+                100m,
+                500m);
+
+            Assert.Equal(42, course.Id);
+        }
+
+        /// <summary>
+        /// Verifies that a course rejects a non-positive identifier.
+        /// </summary>
+        /// <param name="id">The identifier to test.</param>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void Course_ShouldRejectNonPositiveId(int id)
+        {
+            Assert.Throws<ArgumentException>(() =>
+                new Course(
+                    id,
+                    "Programming",
+                    "Introduction to programming.",
+                    5,
+                    100m,
+                    500m));
+        }
     }
 }

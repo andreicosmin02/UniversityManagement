@@ -146,7 +146,7 @@ public class AcademicReportingServiceTests
         new Enrollment(studentA, courseA, semester),
         new Enrollment(studentA, courseB, semester),
         new Enrollment(studentB, courseA, semester),
-    };
+        };
 
         var attemptsByStudent =
             new Dictionary<Student, IEnumerable<ExamAttempt>>
@@ -188,7 +188,7 @@ public class AcademicReportingServiceTests
         {
         new Enrollment(student, courseA, semester),
         new Enrollment(student, courseB, semester),
-    };
+        };
 
         var attemptsByStudent =
             new Dictionary<Student, IEnumerable<ExamAttempt>>

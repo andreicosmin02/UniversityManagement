@@ -62,6 +62,37 @@ public class Course
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="Course"/> class with an identifier.
+    /// </summary>
+    /// <param name="id">The course identifier.</param>
+    /// <param name="name">The course name.</param>
+    /// <param name="description">The course description.</param>
+    /// <param name="credits">The number of credits allocated to the course.</param>
+    /// <param name="minimumCostPerCredit">The minimum cost per credit.</param>
+    /// <param name="cost">The course cost.</param>
+    public Course(
+        int id,
+        string name,
+        string description,
+        int credits,
+        decimal minimumCostPerCredit,
+        decimal cost)
+        : this(name, description, credits, minimumCostPerCredit, cost)
+    {
+        if (id <= 0)
+        {
+            throw new ArgumentException("Course identifier must be greater than zero.", nameof(id));
+        }
+
+        this.Id = id;
+    }
+
+    /// <summary>
+    /// Gets the persistent identifier of the course, when available.
+    /// </summary>
+    public int? Id { get; }
+
+    /// <summary>
     /// Gets the course name.
     /// </summary>
     public string Name { get; }
