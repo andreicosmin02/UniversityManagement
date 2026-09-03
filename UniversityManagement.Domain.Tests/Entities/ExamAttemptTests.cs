@@ -126,4 +126,53 @@ public class ExamAttemptTests
 
         Assert.Equal(expected, examAttempt.Passed);
     }
+
+    /// <summary>
+    /// Verifies that a new exam attempt starts without a persistent identifier.
+    /// </summary>
+    [Fact]
+    public void ExamAttempt_ShouldStartWithZeroId()
+    {
+        var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+        var attempt = new ExamAttempt(course, 7, new DateTime(2026, 6, 10));
+
+        Assert.Equal(0, attempt.Id);
+    }
+
+    /// <summary>
+    /// Verifies that an existing exam attempt can store a persistent identifier.
+    /// </summary>
+    [Fact]
+    public void ExamAttempt_ShouldStorePositiveId()
+    {
+        var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+        var attempt = new ExamAttempt(
+            1,
+            course,
+            7,
+            new DateTime(2026, 6, 10));
+
+        Assert.Equal(1, attempt.Id);
+    }
+
+    /// <summary>
+    /// Verifies that an existing exam attempt rejects a non-positive identifier.
+    /// </summary>
+    /// <param name="id">The invalid identifier to test.</param>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void ExamAttempt_ShouldRejectNonPositiveId(int id)
+    {
+        var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+        Assert.Throws<ArgumentException>(
+            () => new ExamAttempt(
+                id,
+                course,
+                7,
+                new DateTime(2026, 6, 10)));
+    }
 }

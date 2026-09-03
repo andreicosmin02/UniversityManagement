@@ -374,4 +374,95 @@ public class UniversityManagementDbContextTests
             context.Database.EnsureDeleted();
         }
     }
+
+    /// <summary>
+    /// Verifies that saving an exam attempt persists it and assigns a database identifier.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistExamAttempt()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var course = new Course(
+                "Mathematics",
+                "Basic mathematics",
+                5,
+                100,
+                500);
+
+            var attempt = new ExamAttempt(
+                course,
+                7,
+                new DateTime(2026, 6, 10));
+
+            context.ExamAttempts.Add(attempt);
+            context.SaveChanges();
+
+            Assert.True(attempt.Id > 0);
+            Assert.Equal(1, context.ExamAttempts.Count());
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that an exam attempt preserves its course after persistence.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistExamAttemptCourse()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var course = new Course(
+                "Mathematics",
+                "Basic mathematics",
+                5,
+                100,
+                500);
+
+            var attempt = new ExamAttempt(
+                course,
+                7,
+                new DateTime(2026, 6, 10));
+
+            context.ExamAttempts.Add(attempt);
+            context.SaveChanges();
+
+            context.ChangeTracker.Clear();
+
+            var storedAttempt = context.ExamAttempts
+                .Include(item => item.Course)
+                .Single();
+
+            Assert.Equal("Mathematics", storedAttempt.Course.Name);
+            Assert.Equal(7, storedAttempt.Grade);
+            Assert.True(storedAttempt.Passed);
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
 }

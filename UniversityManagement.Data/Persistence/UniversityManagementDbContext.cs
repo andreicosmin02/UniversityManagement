@@ -42,6 +42,11 @@ public class UniversityManagementDbContext : DbContext
     /// </summary>
     public DbSet<Enrollment> Enrollments => this.Set<Enrollment>();
 
+    /// <summary>
+    /// Gets the exam attempts stored in the database.
+    /// </summary>
+    public DbSet<ExamAttempt> ExamAttempts => this.Set<ExamAttempt>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -126,6 +131,26 @@ public class UniversityManagementDbContext : DbContext
             entity.HasOne(enrollment => enrollment.Semester)
                 .WithMany()
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<ExamAttempt>(entity =>
+        {
+            entity.HasKey(attempt => attempt.Id);
+
+            entity.Property(attempt => attempt.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(attempt => attempt.Grade)
+                .IsRequired();
+
+            entity.Property(attempt => attempt.ExamDate)
+                .IsRequired();
+
+            entity.HasOne(attempt => attempt.Course)
+                .WithMany()
+                .IsRequired();
+
+            entity.Ignore(attempt => attempt.Passed);
         });
     }
 }
