@@ -4,6 +4,8 @@
 
 namespace UniversityManagement.Services.Tests;
 
+using Microsoft.Extensions.Logging;
+using Moq;
 using UniversityManagement.Domain.Entities;
 using Xunit;
 
@@ -261,6 +263,105 @@ public class CourseSelectionServiceTests
                 semester,
                 Array.Empty<Enrollment>(),
                 null!));
+    }
+
+    /// <summary>
+    /// Verifies that a successful course selection is logged.
+    /// </summary>
+    [Fact]
+    public void SelectCourse_ShouldLogSuccessfulSelection()
+    {
+        var student = CreateStudent("S001");
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var semester = new Semester(1, 0);
+        semester.AddCourse(course);
+
+        var logger = new Mock<ILogger<CourseSelectionService>>();
+        var service = new CourseSelectionService(logger.Object);
+
+        service.SelectCourse(
+            student,
+            course,
+            semester,
+            Array.Empty<Enrollment>());
+
+        logger.Verify(
+            loggerInstance => loggerInstance.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>(
+                    (value, type) =>
+                        value.ToString() !.Contains("selected")),
+                It.IsAny<Exception?>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Verifies that an unavailable course selection is logged as a warning.
+    /// </summary>
+    [Fact]
+    public void SelectCourse_ShouldLogWarningWhenCourseIsUnavailable()
+    {
+        var student = CreateStudent("S001");
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var semester = new Semester(1, 0);
+
+        var logger = new Mock<ILogger<CourseSelectionService>>();
+        var service = new CourseSelectionService(logger.Object);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            service.SelectCourse(
+                student,
+                course,
+                semester,
+                Array.Empty<Enrollment>()));
+
+        logger.Verify(
+            loggerInstance => loggerInstance.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>(
+                    (value, type) =>
+                        value.ToString() !.Contains("not available")),
+                It.IsAny<Exception?>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Verifies that a duplicate course selection is logged as a warning.
+    /// </summary>
+    [Fact]
+    public void SelectCourse_ShouldLogWarningWhenCourseIsAlreadySelected()
+    {
+        var student = CreateStudent("S001");
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var semester = new Semester(1, 0);
+        semester.AddCourse(course);
+
+        var existingEnrollment = new Enrollment(student, course, semester);
+
+        var logger = new Mock<ILogger<CourseSelectionService>>();
+        var service = new CourseSelectionService(logger.Object);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            service.SelectCourse(
+                student,
+                course,
+                semester,
+                new[] { existingEnrollment }));
+
+        logger.Verify(
+            loggerInstance => loggerInstance.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>(
+                    (value, type) =>
+                        value.ToString() !.Contains("already selected")),
+                It.IsAny<Exception?>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
     }
 
     private static Student CreateStudent(string registrationNumber)

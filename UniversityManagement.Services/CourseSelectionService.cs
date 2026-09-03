@@ -5,6 +5,8 @@
 namespace UniversityManagement.Services;
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using UniversityManagement.Domain.Entities;
 
 /// <summary>
@@ -12,6 +14,18 @@ using UniversityManagement.Domain.Entities;
 /// </summary>
 public class CourseSelectionService
 {
+    private readonly ILogger<CourseSelectionService> logger;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CourseSelectionService"/> class.
+    /// </summary>
+    /// <param name="logger">The logger used to record course selection operations.</param>
+    public CourseSelectionService(
+        ILogger<CourseSelectionService>? logger = null)
+    {
+        this.logger = logger ?? NullLogger<CourseSelectionService>.Instance;
+    }
+
     /// <summary>
     /// Selects a course for a student in a semester.
     /// </summary>
@@ -24,10 +38,10 @@ public class CourseSelectionService
     /// Thrown when the course cannot be selected.
     /// </exception>
     public Enrollment SelectCourse(
-    Student student,
-    Course course,
-    Semester semester,
-    IEnumerable<Enrollment> existingEnrollments)
+        Student student,
+        Course course,
+        Semester semester,
+        IEnumerable<Enrollment> existingEnrollments)
     {
         ArgumentNullException.ThrowIfNull(student);
         ArgumentNullException.ThrowIfNull(course);
@@ -36,6 +50,11 @@ public class CourseSelectionService
 
         if (!semester.Courses.Contains(course))
         {
+            this.logger.LogWarning(
+                "Course {CourseName} is not available in semester {SemesterNumber}.",
+                course.Name,
+                semester.Number);
+
             throw new InvalidOperationException(
                 "The course is not available in the selected semester.");
         }
@@ -45,12 +64,25 @@ public class CourseSelectionService
             if (ReferenceEquals(enrollment.Student, student)
                 && ReferenceEquals(enrollment.Course, course))
             {
+                this.logger.LogWarning(
+                    "Student {RegistrationNumber} has already selected course {CourseName}.",
+                    student.RegistrationNumber,
+                    course.Name);
+
                 throw new InvalidOperationException(
                     "The student has already selected this course.");
             }
         }
 
-        return new Enrollment(student, course, semester);
+        var newEnrollment = new Enrollment(student, course, semester);
+
+        this.logger.LogInformation(
+            "Student {RegistrationNumber} selected course {CourseName} in semester {SemesterNumber}.",
+            student.RegistrationNumber,
+            course.Name,
+            semester.Number);
+
+        return newEnrollment;
     }
 
     /// <summary>
@@ -66,11 +98,11 @@ public class CourseSelectionService
     /// Thrown when a prerequisite has not been satisfied.
     /// </exception>
     public Enrollment SelectCourse(
-    Student student,
-    Course course,
-    Semester semester,
-    IEnumerable<Enrollment> existingEnrollments,
-    IEnumerable<ExamAttempt> examAttempts)
+        Student student,
+        Course course,
+        Semester semester,
+        IEnumerable<Enrollment> existingEnrollments,
+        IEnumerable<ExamAttempt> examAttempts)
     {
         ArgumentNullException.ThrowIfNull(examAttempts);
 
