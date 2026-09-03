@@ -50,7 +50,14 @@ public class FinancialReportingService
         ArgumentNullException.ThrowIfNull(students);
         ArgumentNullException.ThrowIfNull(transactions);
 
-        return students.Average(
+        var studentList = students.ToList();
+
+        if (studentList.Count == 0)
+        {
+            return 0m;
+        }
+
+        return studentList.Average(
             student => this.GetTotalPaid(
                 student,
                 transactions,

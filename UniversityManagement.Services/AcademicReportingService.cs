@@ -59,7 +59,7 @@ public class AcademicReportingService
     /// </summary>
     /// <param name="course">The course to evaluate.</param>
     /// <param name="examAttempts">The exam attempts to evaluate.</param>
-    /// <returns>The average of passing grades.</returns>
+    /// <returns>The average of passing grades, or zero when there are no passing grades.</returns>
     public decimal GetAveragePassingGrade(
         Course course,
         IEnumerable<ExamAttempt> examAttempts)
@@ -67,26 +67,36 @@ public class AcademicReportingService
         ArgumentNullException.ThrowIfNull(course);
         ArgumentNullException.ThrowIfNull(examAttempts);
 
-        return examAttempts
+        var passingGrades = examAttempts
             .Where(attempt =>
                 ReferenceEquals(attempt.Course, course)
                 && attempt.Passed)
-            .Average(attempt => (decimal)attempt.Grade);
+            .Select(attempt => (decimal)attempt.Grade)
+            .ToList();
+
+        return passingGrades.Count == 0
+            ? 0m
+            : passingGrades.Average();
     }
 
     /// <summary>
     /// Gets the average number of selected courses per student.
     /// </summary>
     /// <param name="enrollments">The existing enrollments.</param>
-    /// <returns>The average number of courses selected per student.</returns>
+    /// <returns>The average number of courses selected per student, or zero when there are no enrollments.</returns>
     public decimal GetAverageCoursesPerStudent(
         IEnumerable<Enrollment> enrollments)
     {
         ArgumentNullException.ThrowIfNull(enrollments);
 
-        return enrollments
+        var coursesPerStudent = enrollments
             .GroupBy(enrollment => enrollment.Student)
-            .Average(group => (decimal)group.Count());
+            .Select(group => (decimal)group.Count())
+            .ToList();
+
+        return coursesPerStudent.Count == 0
+            ? 0m
+            : coursesPerStudent.Average();
     }
 
     /// <summary>

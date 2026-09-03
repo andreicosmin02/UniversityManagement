@@ -85,6 +85,22 @@ public class FinancialReportingServiceTests
         Assert.Equal(600m, average);
     }
 
+    /// <summary>
+    /// Verifies that the average payment is zero when there are no students.
+    /// </summary>
+    [Fact]
+    public void GetAveragePaidPerStudent_ShouldReturnZeroWhenThereAreNoStudents()
+    {
+        var service = new FinancialReportingService();
+
+        var average = service.GetAveragePaidPerStudent(
+            Array.Empty<Student>(),
+            Array.Empty<PaymentTransaction>(),
+            new DateTime(2026, 6, 30));
+
+        Assert.Equal(0m, average);
+    }
+
     private static Student CreateStudent(string registrationNumber)
     {
         return new Student(

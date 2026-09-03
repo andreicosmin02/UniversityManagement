@@ -73,17 +73,12 @@ public class Student
         this.phoneNumbers = phoneNumbers.ToList();
         this.emails = emails.ToList();
 
-        // Accepts common local and international phone formats:
-        // - 7 to 15 digits in total
-        // - optional international prefix: + followed by 1-3 digits
-        // - separators: space, hyphen or dot
-        // - optional parentheses around a group, e.g. +1 (415) 555-2671
-        // Examples: 0722123456, 0722 123 456, 0722-123-456,
-        //           +40 722 123 456, +44 20 7946 0958, +1 (415) 555-2671
-        // This validates the format only; it does not verify that the country code
-        // or the phone number actually exists.
-        const string phonePattern =
-            @"^(?=(?:\D*\d){7,15}\D*$)(?:\+\d{1,3}[ .-]?)?(?:\(\d{1,4}\)|\d{1,4})(?:[ .-]?(?:\(\d{1,4}\)|\d{1,4})){1,4}$";
+        // Accepts the Romanian phone format required by the application:
+        // - exactly 4 digits for the prefix
+        // - exactly 6 digits for the phone number
+        // - one optional space between the two groups
+        // Examples: 0722123456, 0722 123456
+        const string phonePattern = @"^\d{4} ?\d{6}$";
 
         if (this.phoneNumbers.Any(phoneNumber =>
             string.IsNullOrWhiteSpace(phoneNumber) ||

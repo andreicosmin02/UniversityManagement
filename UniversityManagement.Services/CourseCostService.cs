@@ -24,6 +24,9 @@ public class CourseCostService
         IEnumerable<Course> selectedCourses,
         DiscountRule discountRule)
     {
+        ArgumentNullException.ThrowIfNull(selectedCourses);
+        ArgumentNullException.ThrowIfNull(discountRule);
+
         var selectedCourseList = selectedCourses.ToList();
 
         var discountApplies = discountRule.Courses.All(

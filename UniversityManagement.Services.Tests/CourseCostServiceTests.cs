@@ -48,4 +48,31 @@ public class CourseCostServiceTests
 
         Assert.Equal(1690m, total);
     }
+
+    /// <summary>
+    /// Verifies that a null selected course collection is rejected.
+    /// </summary>
+    [Fact]
+    public void CalculateTotal_ShouldRejectNullSelectedCourses()
+    {
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var rule = new DiscountRule(new[] { course }, 10m);
+        var service = new CourseCostService();
+
+        Assert.Throws<ArgumentNullException>(() =>
+            service.CalculateTotal(null!, rule));
+    }
+
+    /// <summary>
+    /// Verifies that a null discount rule is rejected.
+    /// </summary>
+    [Fact]
+    public void CalculateTotal_ShouldRejectNullDiscountRule()
+    {
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var service = new CourseCostService();
+
+        Assert.Throws<ArgumentNullException>(() =>
+            service.CalculateTotal(new[] { course }, null!));
+    }
 }

@@ -197,6 +197,36 @@ public class AcademicReportingServiceTests
         Assert.Equal(0, count);
     }
 
+    /// <summary>
+    /// Verifies that a course with no passing grades has an average of zero.
+    /// </summary>
+    [Fact]
+    public void GetAveragePassingGrade_ShouldReturnZeroWhenThereAreNoPassingGrades()
+    {
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var service = new AcademicReportingService();
+
+        var average = service.GetAveragePassingGrade(
+            course,
+            Array.Empty<ExamAttempt>());
+
+        Assert.Equal(0m, average);
+    }
+
+    /// <summary>
+    /// Verifies that the average number of courses is zero when there are no enrollments.
+    /// </summary>
+    [Fact]
+    public void GetAverageCoursesPerStudent_ShouldReturnZeroWhenThereAreNoEnrollments()
+    {
+        var service = new AcademicReportingService();
+
+        var average = service.GetAverageCoursesPerStudent(
+            Array.Empty<Enrollment>());
+
+        Assert.Equal(0m, average);
+    }
+
     private static Student CreateStudent(string registrationNumber)
     {
         return new Student(

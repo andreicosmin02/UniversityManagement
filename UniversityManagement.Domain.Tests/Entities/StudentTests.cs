@@ -189,18 +189,12 @@ namespace UniversityManagement.Domain.Tests.Entities
         }
 
         /// <summary>
-        /// Verifies accepted phone number formats.
+        /// Verifies accepted Romanian phone number formats.
         /// </summary>
         /// <param name="phoneNumber">The phone number value to test.</param>
         [Theory]
         [InlineData("0722123456")]
-        [InlineData("0722 123 456")]
-        [InlineData("0722-123-456")]
-        [InlineData("0722.123.456")]
-        [InlineData("+40 722 123 456")]
-        [InlineData("+40-722-123-456")]
-        [InlineData("+1 (415) 555-2671")]
-        [InlineData("+44 20 7946 0958")]
+        [InlineData("0722 123456")]
         public void Student_ShouldAcceptValidPhoneNumberFormats(string phoneNumber)
         {
             var student = new Student(
@@ -224,9 +218,10 @@ namespace UniversityManagement.Domain.Tests.Entities
         [InlineData("   ")]
         [InlineData("abc")]
         [InlineData("0722ABC456")]
-        [InlineData("++40 722 123 456")]
-        [InlineData("+40 (722 123 456")]
-        [InlineData("+40 722) 123456")]
+        [InlineData("0722 123 456")]
+        [InlineData("0722-123-456")]
+        [InlineData("+40 722 123 456")]
+        [InlineData("+1 (415) 555-2671")]
         [InlineData("123")]
         [InlineData("1234567890123456")]
         public void Student_ShouldRejectInvalidPhoneNumberFormats(string phoneNumber)
