@@ -4,6 +4,7 @@
 
 namespace UniversityManagement.Data.Repositories;
 
+using Microsoft.EntityFrameworkCore;
 using UniversityManagement.Data.Persistence;
 using UniversityManagement.Domain.Entities;
 
@@ -42,6 +43,9 @@ public class ExamAttemptRepository
     /// </returns>
     public ExamAttempt? GetById(int id)
     {
-        return this.context.ExamAttempts.Find(id);
+        return this.context.ExamAttempts
+            .Include(attempt => attempt.Student)
+            .Include(attempt => attempt.Course)
+            .SingleOrDefault(attempt => attempt.Id == id);
     }
 }

@@ -33,8 +33,10 @@ public class ExamAttemptRepositoryTests
         {
             context.Database.EnsureCreated();
 
-            var course = new Course("Math", "Mathematics", 5, 100, 500);
+            var student = CreateStudent();
+            var course = new Course("Math", "Mathematics", 5, 100m, 500m);
             var attempt = new ExamAttempt(
+                student,
                 course,
                 7,
                 new DateTime(2026, 6, 10));
@@ -70,8 +72,10 @@ public class ExamAttemptRepositoryTests
         {
             context.Database.EnsureCreated();
 
-            var course = new Course("Math", "Mathematics", 5, 100, 500);
+            var student = CreateStudent();
+            var course = new Course("Math", "Mathematics", 5, 100m, 500m);
             var attempt = new ExamAttempt(
+                student,
                 course,
                 7,
                 new DateTime(2026, 6, 10));
@@ -85,7 +89,15 @@ public class ExamAttemptRepositoryTests
 
             Assert.NotNull(storedAttempt);
             Assert.Equal(7, storedAttempt.Grade);
-            Assert.Equal(new DateTime(2026, 6, 10), storedAttempt.ExamDate);
+            Assert.Equal(
+                new DateTime(2026, 6, 10),
+                storedAttempt.ExamDate);
+            Assert.Equal(
+                "S001",
+                storedAttempt.Student.RegistrationNumber);
+            Assert.Equal(
+                "Math",
+                storedAttempt.Course.Name);
         }
         finally
         {
@@ -121,5 +133,17 @@ public class ExamAttemptRepositoryTests
         {
             context.Database.EnsureDeleted();
         }
+    }
+
+    private static Student CreateStudent()
+    {
+        return new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "S001",
+            new[] { "0722123456" },
+            Array.Empty<string>());
     }
 }

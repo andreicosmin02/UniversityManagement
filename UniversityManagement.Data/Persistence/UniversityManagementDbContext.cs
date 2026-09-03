@@ -169,6 +169,10 @@ public class UniversityManagementDbContext : DbContext
             entity.Property(attempt => attempt.ExamDate)
                 .IsRequired();
 
+            entity.HasOne(attempt => attempt.Student)
+                .WithMany()
+                .IsRequired();
+
             entity.HasOne(attempt => attempt.Course)
                 .WithMany()
                 .IsRequired();

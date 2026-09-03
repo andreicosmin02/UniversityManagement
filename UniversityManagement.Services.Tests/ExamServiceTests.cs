@@ -18,16 +18,22 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldRejectReexaminationAfterPassing()
     {
+        var student = CreateStudent();
         var course = new Course("A", "Course A", 5, 100m, 500m);
         var previousAttempts = new[]
         {
-            new ExamAttempt(course, 5, new DateTime(2026, 6, 10)),
+            new ExamAttempt(
+                student,
+                course,
+                5,
+                new DateTime(2026, 6, 10)),
         };
 
         var service = new ExamService(3);
 
         Assert.Throws<InvalidOperationException>(
             () => service.RegisterAttempt(
+                student,
                 course,
                 8,
                 new DateTime(2026, 7, 10),
@@ -40,20 +46,27 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldAllowReexaminationAfterFailure()
     {
+        var student = CreateStudent();
         var course = new Course("A", "Course A", 5, 100m, 500m);
         var previousAttempts = new[]
         {
-            new ExamAttempt(course, 4, new DateTime(2026, 6, 10)),
+            new ExamAttempt(
+                student,
+                course,
+                4,
+                new DateTime(2026, 6, 10)),
         };
 
         var service = new ExamService(3);
 
         var attempt = service.RegisterAttempt(
+            student,
             course,
             7,
             new DateTime(2026, 7, 10),
             previousAttempts);
 
+        Assert.Same(student, attempt.Student);
         Assert.Same(course, attempt.Course);
         Assert.Equal(7, attempt.Grade);
         Assert.Equal(new DateTime(2026, 7, 10), attempt.ExamDate);
@@ -65,15 +78,18 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldAllowFirstAttempt()
     {
+        var student = CreateStudent();
         var course = new Course("A", "Course A", 5, 100m, 500m);
         var service = new ExamService(3);
 
         var attempt = service.RegisterAttempt(
+            student,
             course,
             6,
             new DateTime(2026, 6, 10),
             Array.Empty<ExamAttempt>());
 
+        Assert.Same(student, attempt.Student);
         Assert.True(attempt.Passed);
     }
 
@@ -83,18 +99,24 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldRejectSecondExamOnSameDay()
     {
+        var student = CreateStudent();
         var firstCourse = new Course("A", "Course A", 5, 100m, 500m);
         var secondCourse = new Course("B", "Course B", 5, 100m, 500m);
 
         var previousAttempts = new[]
         {
-            new ExamAttempt(firstCourse, 4, new DateTime(2026, 6, 10, 9, 0, 0)),
+            new ExamAttempt(
+                student,
+                firstCourse,
+                4,
+                new DateTime(2026, 6, 10, 9, 0, 0)),
         };
 
         var service = new ExamService(3);
 
         Assert.Throws<InvalidOperationException>(
             () => service.RegisterAttempt(
+                student,
                 secondCourse,
                 7,
                 new DateTime(2026, 6, 10, 15, 0, 0),
@@ -107,22 +129,29 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldAllowExamOnDifferentDay()
     {
+        var student = CreateStudent();
         var firstCourse = new Course("A", "Course A", 5, 100m, 500m);
         var secondCourse = new Course("B", "Course B", 5, 100m, 500m);
 
         var previousAttempts = new[]
         {
-            new ExamAttempt(firstCourse, 4, new DateTime(2026, 6, 10)),
+            new ExamAttempt(
+                student,
+                firstCourse,
+                4,
+                new DateTime(2026, 6, 10)),
         };
 
         var service = new ExamService(3);
 
         var attempt = service.RegisterAttempt(
+            student,
             secondCourse,
             7,
             new DateTime(2026, 6, 11),
             previousAttempts);
 
+        Assert.Same(student, attempt.Student);
         Assert.Same(secondCourse, attempt.Course);
     }
 
@@ -132,11 +161,13 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldRejectNullPreviousAttempts()
     {
+        var student = CreateStudent();
         var course = new Course("A", "Course A", 5, 100m, 500m);
         var service = new ExamService(3);
 
         Assert.Throws<ArgumentNullException>(
             () => service.RegisterAttempt(
+                student,
                 course,
                 7,
                 new DateTime(2026, 6, 10),
@@ -149,6 +180,7 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldRejectMissingPrerequisite()
     {
+        var student = CreateStudent();
         var requiredCourse = new Course("A", "Course A", 5, 100m, 500m);
         var course = new Course("B", "Course B", 5, 100m, 500m);
         course.AddPrerequisite(new Prerequisite(requiredCourse, 7));
@@ -157,6 +189,7 @@ public class ExamServiceTests
 
         Assert.Throws<InvalidOperationException>(
             () => service.RegisterAttempt(
+                student,
                 course,
                 8,
                 new DateTime(2026, 7, 10),
@@ -169,19 +202,25 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldRejectPrerequisiteBelowRequiredGrade()
     {
+        var student = CreateStudent();
         var requiredCourse = new Course("A", "Course A", 5, 100m, 500m);
         var course = new Course("B", "Course B", 5, 100m, 500m);
         course.AddPrerequisite(new Prerequisite(requiredCourse, 7));
 
         var previousAttempts = new[]
         {
-            new ExamAttempt(requiredCourse, 6, new DateTime(2026, 6, 10)),
+            new ExamAttempt(
+                student,
+                requiredCourse,
+                6,
+                new DateTime(2026, 6, 10)),
         };
 
         var service = new ExamService(3);
 
         Assert.Throws<InvalidOperationException>(
             () => service.RegisterAttempt(
+                student,
                 course,
                 8,
                 new DateTime(2026, 7, 10),
@@ -194,23 +233,30 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldAllowExamWhenPrerequisiteIsSatisfied()
     {
+        var student = CreateStudent();
         var requiredCourse = new Course("A", "Course A", 5, 100m, 500m);
         var course = new Course("B", "Course B", 5, 100m, 500m);
         course.AddPrerequisite(new Prerequisite(requiredCourse, 7));
 
         var previousAttempts = new[]
         {
-            new ExamAttempt(requiredCourse, 7, new DateTime(2026, 6, 10)),
+            new ExamAttempt(
+                student,
+                requiredCourse,
+                7,
+                new DateTime(2026, 6, 10)),
         };
 
         var service = new ExamService(3);
 
         var attempt = service.RegisterAttempt(
+            student,
             course,
             8,
             new DateTime(2026, 7, 10),
             previousAttempts);
 
+        Assert.Same(student, attempt.Student);
         Assert.Same(course, attempt.Course);
     }
 
@@ -220,18 +266,32 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldRejectAttemptWhenMaximumIsReached()
     {
+        var student = CreateStudent();
         var course = new Course("A", "Course A", 5, 100m, 500m);
         var previousAttempts = new[]
         {
-            new ExamAttempt(course, 2, new DateTime(2026, 6, 1)),
-            new ExamAttempt(course, 3, new DateTime(2026, 6, 5)),
-            new ExamAttempt(course, 4, new DateTime(2026, 6, 10)),
+            new ExamAttempt(
+                student,
+                course,
+                2,
+                new DateTime(2026, 6, 1)),
+            new ExamAttempt(
+                student,
+                course,
+                3,
+                new DateTime(2026, 6, 5)),
+            new ExamAttempt(
+                student,
+                course,
+                4,
+                new DateTime(2026, 6, 10)),
         };
 
         var service = new ExamService(3);
 
         Assert.Throws<InvalidOperationException>(
             () => service.RegisterAttempt(
+                student,
                 course,
                 4,
                 new DateTime(2026, 6, 15),
@@ -244,21 +304,32 @@ public class ExamServiceTests
     [Fact]
     public void RegisterAttempt_ShouldAllowAttemptBeforeMaximumIsReached()
     {
+        var student = CreateStudent();
         var course = new Course("A", "Course A", 5, 100m, 500m);
         var previousAttempts = new[]
         {
-            new ExamAttempt(course, 2, new DateTime(2026, 6, 1)),
-            new ExamAttempt(course, 4, new DateTime(2026, 6, 5)),
+            new ExamAttempt(
+                student,
+                course,
+                2,
+                new DateTime(2026, 6, 1)),
+            new ExamAttempt(
+                student,
+                course,
+                4,
+                new DateTime(2026, 6, 5)),
         };
 
         var service = new ExamService(3);
 
         var attempt = service.RegisterAttempt(
+            student,
             course,
             4,
             new DateTime(2026, 6, 10),
             previousAttempts);
 
+        Assert.Same(student, attempt.Student);
         Assert.Same(course, attempt.Course);
     }
 
@@ -273,5 +344,17 @@ public class ExamServiceTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(
             () => new ExamService(maximumAttempts));
+    }
+
+    private static Student CreateStudent()
+    {
+        return new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "S001",
+            new[] { "0722123456" },
+            Array.Empty<string>());
     }
 }

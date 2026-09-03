@@ -198,7 +198,11 @@ public class CourseSelectionServiceTests
 
         var examAttempts = new[]
         {
-        new ExamAttempt(requiredCourse, 7, new DateTime(2026, 6, 10)),
+            new ExamAttempt(
+                student,
+                requiredCourse,
+                7,
+                new DateTime(2026, 6, 10)),
         };
 
         var service = new CourseSelectionService();
@@ -229,7 +233,11 @@ public class CourseSelectionServiceTests
 
         var examAttempts = new[]
         {
-        new ExamAttempt(requiredCourse, 6, new DateTime(2026, 6, 10)),
+            new ExamAttempt(
+                student,
+                requiredCourse,
+                6,
+                new DateTime(2026, 6, 10)),
         };
 
         var service = new CourseSelectionService();

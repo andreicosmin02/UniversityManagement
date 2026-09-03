@@ -12,14 +12,17 @@ public class ExamAttempt
     /// <summary>
     /// Initializes a new instance of the <see cref="ExamAttempt"/> class.
     /// </summary>
+    /// <param name="student">The student taking the exam.</param>
     /// <param name="course">The course for which the exam is taken.</param>
     /// <param name="grade">The grade obtained at the exam.</param>
     /// <param name="examDate">The date when the examination took place.</param>
     public ExamAttempt(
+        Student student,
         Course course,
         int grade,
         DateTime examDate)
     {
+        ArgumentNullException.ThrowIfNull(student);
         ArgumentNullException.ThrowIfNull(course);
 
         if (grade < 1 || grade > 10)
@@ -29,6 +32,7 @@ public class ExamAttempt
                 nameof(grade));
         }
 
+        this.Student = student;
         this.Course = course;
         this.Grade = grade;
         this.ExamDate = examDate;
@@ -39,15 +43,17 @@ public class ExamAttempt
     /// with an existing persistent identifier.
     /// </summary>
     /// <param name="id">The persistent identifier.</param>
+    /// <param name="student">The student who took the exam.</param>
     /// <param name="course">The examined course.</param>
     /// <param name="grade">The obtained grade.</param>
     /// <param name="examDate">The exam date.</param>
     public ExamAttempt(
         int id,
+        Student student,
         Course course,
         int grade,
         DateTime examDate)
-        : this(course, grade, examDate)
+        : this(student, course, grade, examDate)
     {
         if (id <= 0)
         {
@@ -64,6 +70,7 @@ public class ExamAttempt
     /// </summary>
     private ExamAttempt()
     {
+        this.Student = null!;
         this.Course = null!;
     }
 
@@ -71,6 +78,11 @@ public class ExamAttempt
     /// Gets the persistent identifier of the exam attempt.
     /// </summary>
     public int Id { get; private set; }
+
+    /// <summary>
+    /// Gets the student who took the exam.
+    /// </summary>
+    public Student Student { get; private set; }
 
     /// <summary>
     /// Gets the course for which the exam was taken.

@@ -18,6 +18,7 @@ public class PromotionServiceTests
     [Fact]
     public void CanPromote_ShouldReturnTrueWhenMinimumCreditsAreReached()
     {
+        var student = CreateStudent();
         var courseA = new Course("A", "Course A", 5, 100m, 500m);
         var courseB = new Course("B", "Course B", 5, 100m, 500m);
 
@@ -27,8 +28,16 @@ public class PromotionServiceTests
 
         var attempts = new[]
         {
-            new ExamAttempt(courseA, 5, new DateTime(2026, 6, 1)),
-            new ExamAttempt(courseB, 7, new DateTime(2026, 6, 2)),
+            new ExamAttempt(
+                student,
+                courseA,
+                5,
+                new DateTime(2026, 6, 1)),
+            new ExamAttempt(
+                student,
+                courseB,
+                7,
+                new DateTime(2026, 6, 2)),
         };
 
         var service = new PromotionService();
@@ -44,6 +53,7 @@ public class PromotionServiceTests
     [Fact]
     public void CanPromote_ShouldReturnFalseWhenMinimumCreditsAreNotReached()
     {
+        var student = CreateStudent();
         var courseA = new Course("A", "Course A", 5, 100m, 500m);
         var courseB = new Course("B", "Course B", 5, 100m, 500m);
 
@@ -53,8 +63,16 @@ public class PromotionServiceTests
 
         var attempts = new[]
         {
-            new ExamAttempt(courseA, 5, new DateTime(2026, 6, 1)),
-            new ExamAttempt(courseB, 4, new DateTime(2026, 6, 2)),
+            new ExamAttempt(
+                student,
+                courseA,
+                5,
+                new DateTime(2026, 6, 1)),
+            new ExamAttempt(
+                student,
+                courseB,
+                4,
+                new DateTime(2026, 6, 2)),
         };
 
         var service = new PromotionService();
@@ -70,6 +88,7 @@ public class PromotionServiceTests
     [Fact]
     public void CanPromote_ShouldCountOnlyPassedCourses()
     {
+        var student = CreateStudent();
         var passedCourse = new Course("A", "Course A", 6, 100m, 600m);
         var failedCourse = new Course("B", "Course B", 10, 100m, 1000m);
 
@@ -79,12 +98,32 @@ public class PromotionServiceTests
 
         var attempts = new[]
         {
-            new ExamAttempt(passedCourse, 5, new DateTime(2026, 6, 1)),
-            new ExamAttempt(failedCourse, 4, new DateTime(2026, 6, 2)),
+            new ExamAttempt(
+                student,
+                passedCourse,
+                5,
+                new DateTime(2026, 6, 1)),
+            new ExamAttempt(
+                student,
+                failedCourse,
+                4,
+                new DateTime(2026, 6, 2)),
         };
 
         var service = new PromotionService();
 
         Assert.False(service.CanPromote(semester, attempts));
+    }
+
+    private static Student CreateStudent()
+    {
+        return new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "S001",
+            new[] { "0722123456" },
+            Array.Empty<string>());
     }
 }

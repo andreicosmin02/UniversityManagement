@@ -393,14 +393,24 @@ public class UniversityManagementDbContextTests
         {
             context.Database.EnsureCreated();
 
+            var student = new Student(
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "S001",
+                new[] { "0722123456" },
+                Array.Empty<string>());
+
             var course = new Course(
                 "Mathematics",
                 "Basic mathematics",
                 5,
-                100,
-                500);
+                100m,
+                500m);
 
             var attempt = new ExamAttempt(
+                student,
                 course,
                 7,
                 new DateTime(2026, 6, 10));
@@ -418,10 +428,10 @@ public class UniversityManagementDbContextTests
     }
 
     /// <summary>
-    /// Verifies that an exam attempt preserves its course after persistence.
+    /// Verifies that an exam attempt preserves its student and course after persistence.
     /// </summary>
     [Fact]
-    public void SaveChanges_ShouldPersistExamAttemptCourse()
+    public void SaveChanges_ShouldPersistExamAttemptRelationships()
     {
         var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
         var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
@@ -435,14 +445,24 @@ public class UniversityManagementDbContextTests
         {
             context.Database.EnsureCreated();
 
+            var student = new Student(
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "S001",
+                new[] { "0722123456" },
+                Array.Empty<string>());
+
             var course = new Course(
                 "Mathematics",
                 "Basic mathematics",
                 5,
-                100,
-                500);
+                100m,
+                500m);
 
             var attempt = new ExamAttempt(
+                student,
                 course,
                 7,
                 new DateTime(2026, 6, 10));
@@ -453,10 +473,16 @@ public class UniversityManagementDbContextTests
             context.ChangeTracker.Clear();
 
             var storedAttempt = context.ExamAttempts
+                .Include(item => item.Student)
                 .Include(item => item.Course)
                 .Single();
 
-            Assert.Equal("Mathematics", storedAttempt.Course.Name);
+            Assert.Equal(
+                "S001",
+                storedAttempt.Student.RegistrationNumber);
+            Assert.Equal(
+                "Mathematics",
+                storedAttempt.Course.Name);
             Assert.Equal(7, storedAttempt.Grade);
             Assert.True(storedAttempt.Passed);
         }

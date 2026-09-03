@@ -18,6 +18,7 @@ public class AcademicReportingServiceTests
     [Fact]
     public void GetEarnedCredits_ShouldCountOnlyPassedCourses()
     {
+        var student = CreateStudent("S001");
         var courseA = new Course("A", "Course A", 6, 100m, 600m);
         var courseB = new Course("B", "Course B", 5, 100m, 500m);
 
@@ -27,8 +28,16 @@ public class AcademicReportingServiceTests
 
         var attempts = new[]
         {
-            new ExamAttempt(courseA, 7, new DateTime(2026, 6, 1)),
-            new ExamAttempt(courseB, 4, new DateTime(2026, 6, 2)),
+            new ExamAttempt(
+                student,
+                courseA,
+                7,
+                new DateTime(2026, 6, 1)),
+            new ExamAttempt(
+                student,
+                courseB,
+                4,
+                new DateTime(2026, 6, 2)),
         };
 
         var service = new AcademicReportingService();
@@ -71,15 +80,32 @@ public class AcademicReportingServiceTests
     [Fact]
     public void GetAveragePassingGrade_ShouldUseOnlyPassingGrades()
     {
+        var student = CreateStudent("S001");
         var courseA = new Course("A", "Course A", 5, 100m, 500m);
         var courseB = new Course("B", "Course B", 5, 100m, 500m);
 
         var attempts = new[]
         {
-            new ExamAttempt(courseA, 4, new DateTime(2026, 6, 1)),
-            new ExamAttempt(courseA, 5, new DateTime(2026, 6, 2)),
-            new ExamAttempt(courseA, 7, new DateTime(2026, 6, 3)),
-            new ExamAttempt(courseB, 10, new DateTime(2026, 6, 4)),
+            new ExamAttempt(
+                student,
+                courseA,
+                4,
+                new DateTime(2026, 6, 1)),
+            new ExamAttempt(
+                student,
+                courseA,
+                5,
+                new DateTime(2026, 6, 2)),
+            new ExamAttempt(
+                student,
+                courseA,
+                7,
+                new DateTime(2026, 6, 3)),
+            new ExamAttempt(
+                student,
+                courseB,
+                10,
+                new DateTime(2026, 6, 4)),
         };
 
         var service = new AcademicReportingService();
@@ -131,9 +157,9 @@ public class AcademicReportingServiceTests
 
         var enrollments = new[]
         {
-        new Enrollment(studentA, courseA, semester),
-        new Enrollment(studentA, courseB, semester),
-        new Enrollment(studentB, courseA, semester),
+            new Enrollment(studentA, courseA, semester),
+            new Enrollment(studentA, courseB, semester),
+            new Enrollment(studentB, courseA, semester),
         };
 
         var attemptsByStudent =
@@ -141,12 +167,24 @@ public class AcademicReportingServiceTests
             {
                 [studentA] = new[]
                 {
-                new ExamAttempt(courseA, 7, new DateTime(2026, 6, 1)),
-                new ExamAttempt(courseB, 5, new DateTime(2026, 6, 2)),
+                    new ExamAttempt(
+                        studentA,
+                        courseA,
+                        7,
+                        new DateTime(2026, 6, 1)),
+                    new ExamAttempt(
+                        studentA,
+                        courseB,
+                        5,
+                        new DateTime(2026, 6, 2)),
                 },
                 [studentB] = new[]
                 {
-                new ExamAttempt(courseA, 4, new DateTime(2026, 6, 1)),
+                    new ExamAttempt(
+                        studentB,
+                        courseA,
+                        4,
+                        new DateTime(2026, 6, 1)),
                 },
             };
 
@@ -174,8 +212,8 @@ public class AcademicReportingServiceTests
 
         var enrollments = new[]
         {
-        new Enrollment(student, courseA, semester),
-        new Enrollment(student, courseB, semester),
+            new Enrollment(student, courseA, semester),
+            new Enrollment(student, courseB, semester),
         };
 
         var attemptsByStudent =
@@ -183,7 +221,11 @@ public class AcademicReportingServiceTests
             {
                 [student] = new[]
                 {
-                new ExamAttempt(courseA, 8, new DateTime(2026, 6, 1)),
+                    new ExamAttempt(
+                        student,
+                        courseA,
+                        8,
+                        new DateTime(2026, 6, 1)),
                 },
             };
 

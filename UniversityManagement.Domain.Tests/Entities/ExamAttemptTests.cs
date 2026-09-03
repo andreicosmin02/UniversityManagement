@@ -13,11 +13,12 @@ using Xunit;
 public class ExamAttemptTests
 {
     /// <summary>
-    /// Verifies that an exam attempt stores its course, grade, and examination date.
+    /// Verifies that an exam attempt stores its student, course, grade, and examination date.
     /// </summary>
     [Fact]
     public void ExamAttempt_ShouldStoreCourseGradeAndExamDate()
     {
+        var student = CreateStudent();
         var course = new Course(
             "Programare",
             "Descriere",
@@ -28,10 +29,12 @@ public class ExamAttemptTests
         var examDate = new DateTime(2026, 6, 15);
 
         var examAttempt = new ExamAttempt(
+            student,
             course,
             8,
             examDate);
 
+        Assert.Same(student, examAttempt.Student);
         Assert.Same(course, examAttempt.Course);
         Assert.Equal(8, examAttempt.Grade);
         Assert.Equal(examDate, examAttempt.ExamDate);
@@ -43,10 +46,15 @@ public class ExamAttemptTests
     [Fact]
     public void ExamAttempt_ShouldRejectNullCourse()
     {
+        var student = CreateStudent();
         var examDate = new DateTime(2026, 6, 15);
 
         Assert.Throws<ArgumentNullException>(
-            () => new ExamAttempt(null!, 8, examDate));
+            () => new ExamAttempt(
+                student,
+                null!,
+                8,
+                examDate));
     }
 
     /// <summary>
@@ -59,6 +67,7 @@ public class ExamAttemptTests
     [InlineData(11)]
     public void ExamAttempt_ShouldRejectGradeOutsideValidRange(int grade)
     {
+        var student = CreateStudent();
         var course = new Course(
             "Programare",
             "Descriere",
@@ -69,7 +78,11 @@ public class ExamAttemptTests
         var examDate = new DateTime(2026, 6, 15);
 
         Assert.Throws<ArgumentException>(
-            () => new ExamAttempt(course, grade, examDate));
+            () => new ExamAttempt(
+                student,
+                course,
+                grade,
+                examDate));
     }
 
     /// <summary>
@@ -81,6 +94,7 @@ public class ExamAttemptTests
     [InlineData(10)]
     public void ExamAttempt_ShouldAcceptGradeAtValidBoundaries(int grade)
     {
+        var student = CreateStudent();
         var course = new Course(
             "Programare",
             "Descriere",
@@ -91,6 +105,7 @@ public class ExamAttemptTests
         var examDate = new DateTime(2026, 6, 15);
 
         var examAttempt = new ExamAttempt(
+            student,
             course,
             grade,
             examDate);
@@ -112,6 +127,7 @@ public class ExamAttemptTests
         int grade,
         bool expected)
     {
+        var student = CreateStudent();
         var course = new Course(
             "Programare",
             "Descriere",
@@ -120,6 +136,7 @@ public class ExamAttemptTests
             750m);
 
         var examAttempt = new ExamAttempt(
+            student,
             course,
             grade,
             new DateTime(2026, 6, 15));
@@ -133,9 +150,14 @@ public class ExamAttemptTests
     [Fact]
     public void ExamAttempt_ShouldStartWithZeroId()
     {
-        var course = new Course("Math", "Mathematics", 5, 100, 500);
+        var student = CreateStudent();
+        var course = new Course("Math", "Mathematics", 5, 100m, 500m);
 
-        var attempt = new ExamAttempt(course, 7, new DateTime(2026, 6, 10));
+        var attempt = new ExamAttempt(
+            student,
+            course,
+            7,
+            new DateTime(2026, 6, 10));
 
         Assert.Equal(0, attempt.Id);
     }
@@ -146,10 +168,12 @@ public class ExamAttemptTests
     [Fact]
     public void ExamAttempt_ShouldStorePositiveId()
     {
-        var course = new Course("Math", "Mathematics", 5, 100, 500);
+        var student = CreateStudent();
+        var course = new Course("Math", "Mathematics", 5, 100m, 500m);
 
         var attempt = new ExamAttempt(
             1,
+            student,
             course,
             7,
             new DateTime(2026, 6, 10));
@@ -166,13 +190,80 @@ public class ExamAttemptTests
     [InlineData(-1)]
     public void ExamAttempt_ShouldRejectNonPositiveId(int id)
     {
-        var course = new Course("Math", "Mathematics", 5, 100, 500);
+        var student = CreateStudent();
+        var course = new Course("Math", "Mathematics", 5, 100m, 500m);
 
         Assert.Throws<ArgumentException>(
             () => new ExamAttempt(
                 id,
+                student,
                 course,
                 7,
                 new DateTime(2026, 6, 10)));
+    }
+
+    /// <summary>
+    /// Verifies that an exam attempt stores the student who took the exam.
+    /// </summary>
+    [Fact]
+    public void ExamAttempt_ShouldStoreStudent()
+    {
+        var student = CreateStudent();
+        var course = new Course("Math", "Mathematics", 5, 100m, 500m);
+
+        var attempt = new ExamAttempt(
+            student,
+            course,
+            7,
+            new DateTime(2026, 6, 10));
+
+        Assert.Same(student, attempt.Student);
+    }
+
+    /// <summary>
+    /// Verifies that an exam attempt cannot be created without a student.
+    /// </summary>
+    [Fact]
+    public void ExamAttempt_ShouldRejectNullStudent()
+    {
+        var course = new Course("Math", "Mathematics", 5, 100m, 500m);
+
+        Assert.Throws<ArgumentNullException>(() =>
+            new ExamAttempt(
+                null!,
+                course,
+                7,
+                new DateTime(2026, 6, 10)));
+    }
+
+    /// <summary>
+    /// Verifies that an existing exam attempt stores its student.
+    /// </summary>
+    [Fact]
+    public void ExamAttempt_WithId_ShouldStoreStudent()
+    {
+        var student = CreateStudent();
+        var course = new Course("Math", "Mathematics", 5, 100m, 500m);
+
+        var attempt = new ExamAttempt(
+            1,
+            student,
+            course,
+            7,
+            new DateTime(2026, 6, 10));
+
+        Assert.Same(student, attempt.Student);
+    }
+
+    private static Student CreateStudent()
+    {
+        return new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "S001",
+            new[] { "0722123456" },
+            Array.Empty<string>());
     }
 }

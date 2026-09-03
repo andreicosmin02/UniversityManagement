@@ -34,25 +34,33 @@ public class ExamService
     }
 
     /// <summary>
-    /// Registers a new exam attempt when the course has not already been passed.
+    /// Registers a new exam attempt when the student is allowed to take the exam.
     /// </summary>
+    /// <param name="student">The student taking the exam.</param>
     /// <param name="course">The course for which the exam is taken.</param>
     /// <param name="grade">The obtained grade.</param>
     /// <param name="examDate">The examination date.</param>
-    /// <param name="previousAttempts">The student's previous exam attempts.</param>
+    /// <param name="previousAttempts">The previous exam attempts to evaluate.</param>
     /// <returns>The newly registered exam attempt.</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the course has already been passed.
+    /// Thrown when the student is not allowed to take the exam.
     /// </exception>
     public ExamAttempt RegisterAttempt(
-    Course course,
-    int grade,
-    DateTime examDate,
-    IEnumerable<ExamAttempt> previousAttempts)
+        Student student,
+        Course course,
+        int grade,
+        DateTime examDate,
+        IEnumerable<ExamAttempt> previousAttempts)
     {
+        ArgumentNullException.ThrowIfNull(student);
+        ArgumentNullException.ThrowIfNull(course);
         ArgumentNullException.ThrowIfNull(previousAttempts);
 
-        foreach (var attempt in previousAttempts)
+        var studentAttempts = previousAttempts
+            .Where(attempt => ReferenceEquals(attempt.Student, student))
+            .ToList();
+
+        foreach (var attempt in studentAttempts)
         {
             if (attempt.ExamDate.Date == examDate.Date)
             {
@@ -67,7 +75,7 @@ public class ExamService
             }
         }
 
-        var courseAttemptCount = previousAttempts.Count(
+        var courseAttemptCount = studentAttempts.Count(
             attempt => ReferenceEquals(attempt.Course, course));
 
         if (courseAttemptCount >= this.maximumAttempts)
@@ -78,7 +86,7 @@ public class ExamService
 
         foreach (var prerequisite in course.Prerequisites)
         {
-            var prerequisiteSatisfied = previousAttempts.Any(
+            var prerequisiteSatisfied = studentAttempts.Any(
                 attempt =>
                     ReferenceEquals(attempt.Course, prerequisite.RequiredCourse)
                     && attempt.Grade >= prerequisite.MinimumGrade);
@@ -90,6 +98,10 @@ public class ExamService
             }
         }
 
-        return new ExamAttempt(course, grade, examDate);
+        return new ExamAttempt(
+            student,
+            course,
+            grade,
+            examDate);
     }
 }
