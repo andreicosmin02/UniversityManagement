@@ -89,6 +89,61 @@ public class CourseRepositoryTests
         }
     }
 
+    /// <summary>
+    /// Verifies that retrieving a course also loads its prerequisites.
+    /// </summary>
+    [Fact]
+    public void GetById_ShouldLoadPrerequisites()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var requiredCourse = new Course(
+                "Programming",
+                "Basic programming",
+                5,
+                100,
+                500);
+
+            var course = new Course(
+                "Algorithms",
+                "Algorithms and data structures",
+                6,
+                100,
+                600);
+
+            course.AddPrerequisite(
+                new Prerequisite(requiredCourse, 7));
+
+            var repository = new CourseRepository(context);
+            repository.Add(course);
+
+            context.ChangeTracker.Clear();
+
+            var storedCourse = repository.GetById(course.Id);
+
+            Assert.NotNull(storedCourse);
+
+            var prerequisite = Assert.Single(storedCourse.Prerequisites);
+
+            Assert.Equal(7, prerequisite.MinimumGrade);
+            Assert.Equal("Programming", prerequisite.RequiredCourse.Name);
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
+
     private static UniversityManagementDbContext CreateContext()
     {
         var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";

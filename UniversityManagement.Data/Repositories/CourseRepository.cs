@@ -6,6 +6,7 @@ namespace UniversityManagement.Data.Repositories;
 
 using UniversityManagement.Data.Persistence;
 using UniversityManagement.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// Provides persistence operations for courses.
@@ -34,12 +35,17 @@ public class CourseRepository
     }
 
     /// <summary>
-    /// Gets a course by its identifier.
+    /// Gets a course by its persistent identifier.
     /// </summary>
     /// <param name="id">The course identifier.</param>
-    /// <returns>The course, or <see langword="null"/> if it does not exist.</returns>
+    /// <returns>
+    /// The matching course, or <see langword="null"/> if none exists.
+    /// </returns>
     public Course? GetById(int id)
     {
-        return this.context.Courses.Find(id);
+        return this.context.Courses
+            .Include(course => course.Prerequisites)
+            .ThenInclude(prerequisite => prerequisite.RequiredCourse)
+            .SingleOrDefault(course => course.Id == id);
     }
 }

@@ -53,6 +53,11 @@ public class UniversityManagementDbContext : DbContext
     public DbSet<PaymentTransaction> PaymentTransactions =>
         this.Set<PaymentTransaction>();
 
+    /// <summary>
+    /// Gets the prerequisites stored in the database.
+    /// </summary>
+    public DbSet<Prerequisite> Prerequisites => this.Set<Prerequisite>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -68,7 +73,14 @@ public class UniversityManagementDbContext : DbContext
             entity.Property(course => course.MinimumCostPerCredit);
             entity.Property(course => course.Cost);
 
-            entity.Ignore(course => course.Prerequisites);
+            entity.HasMany(course => course.Prerequisites)
+                .WithOne()
+                .HasForeignKey("CourseId")
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Navigation(course => course.Prerequisites)
+                .HasField("prerequisites");
         });
 
         modelBuilder.Entity<Student>(entity =>
@@ -175,6 +187,23 @@ public class UniversityManagementDbContext : DbContext
             entity.HasOne(transaction => transaction.Student)
                 .WithMany()
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<Prerequisite>(entity =>
+        {
+            entity.HasKey(prerequisite => prerequisite.Id);
+
+            entity.Property(prerequisite => prerequisite.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(prerequisite => prerequisite.MinimumGrade)
+                .IsRequired();
+
+            entity.HasOne(prerequisite => prerequisite.RequiredCourse)
+                .WithMany()
+                .HasForeignKey("RequiredCourseId")
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

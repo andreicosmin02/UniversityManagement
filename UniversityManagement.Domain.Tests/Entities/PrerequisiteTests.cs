@@ -82,5 +82,46 @@ namespace UniversityManagement.Domain.Tests.Entities
 
             Assert.Equal(minimumGrade, prerequisite.MinimumGrade);
         }
+
+        /// <summary>
+        /// Verifies that a new prerequisite starts without a persistent identifier.
+        /// </summary>
+        [Fact]
+        public void Prerequisite_ShouldStartWithZeroId()
+        {
+            var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+            var prerequisite = new Prerequisite(course, 7);
+
+            Assert.Equal(0, prerequisite.Id);
+        }
+
+        /// <summary>
+        /// Verifies that an existing prerequisite can store a persistent identifier.
+        /// </summary>
+        [Fact]
+        public void Prerequisite_ShouldStorePositiveId()
+        {
+            var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+            var prerequisite = new Prerequisite(1, course, 7);
+
+            Assert.Equal(1, prerequisite.Id);
+        }
+
+        /// <summary>
+        /// Verifies that an existing prerequisite rejects a non-positive identifier.
+        /// </summary>
+        /// <param name="id">The invalid identifier to test.</param>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void Prerequisite_ShouldRejectNonPositiveId(int id)
+        {
+            var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+            Assert.Throws<ArgumentException>(
+                () => new Prerequisite(id, course, 7));
+        }
     }
 }

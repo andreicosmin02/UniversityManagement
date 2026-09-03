@@ -562,4 +562,60 @@ public class UniversityManagementDbContextTests
             context.Database.EnsureDeleted();
         }
     }
+
+    /// <summary>
+    /// Verifies that a course preserves its prerequisites after persistence.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistCoursePrerequisites()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var requiredCourse = new Course(
+                "Programming",
+                "Basic programming",
+                5,
+                100,
+                500);
+
+            var course = new Course(
+                "Algorithms",
+                "Algorithms and data structures",
+                6,
+                100,
+                600);
+
+            course.AddPrerequisite(
+                new Prerequisite(requiredCourse, 7));
+
+            context.Courses.Add(course);
+            context.SaveChanges();
+
+            context.ChangeTracker.Clear();
+
+            var storedCourse = context.Courses
+                .Include(item => item.Prerequisites)
+                .ThenInclude(item => item.RequiredCourse)
+                .Single(item => item.Name == "Algorithms");
+
+            var prerequisite = Assert.Single(storedCourse.Prerequisites);
+
+            Assert.Equal(7, prerequisite.MinimumGrade);
+            Assert.Equal("Programming", prerequisite.RequiredCourse.Name);
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
 }
