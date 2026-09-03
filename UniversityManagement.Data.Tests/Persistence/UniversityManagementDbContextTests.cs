@@ -39,7 +39,8 @@ public class UniversityManagementDbContextTests
                     "Introduction to programming.",
                     5,
                     100m,
-                    500m);
+                    500m,
+                    "EUR");
 
                 context.Courses.Add(course);
                 context.SaveChanges();
@@ -54,6 +55,7 @@ public class UniversityManagementDbContextTests
                 Assert.Equal("Programming", course.Name);
                 Assert.Equal(5, course.Credits);
                 Assert.Equal(500m, course.Cost);
+                Assert.Equal("EUR", course.Currency);
             }
         }
         finally

@@ -77,6 +77,8 @@ public class UniversityManagementDbContext : DbContext
             entity.Property(course => course.Credits);
             entity.Property(course => course.MinimumCostPerCredit);
             entity.Property(course => course.Cost);
+            entity.Property(course => course.Currency)
+                .IsRequired();
 
             entity.HasMany(course => course.Prerequisites)
                 .WithOne()

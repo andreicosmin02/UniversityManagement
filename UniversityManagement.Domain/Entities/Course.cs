@@ -19,12 +19,14 @@ public class Course
     /// <param name="credits">The number of credits awarded by the course.</param>
     /// <param name="minimumCostPerCredit">The minimum cost for each credit.</param>
     /// <param name="cost">The total course cost.</param>
+    /// <param name="currency">The currency used for the course cost.</param>
     public Course(
         string name,
         string description,
         int credits,
         decimal minimumCostPerCredit,
-        decimal cost)
+        decimal cost,
+        string currency = "RON")
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -51,7 +53,15 @@ public class Course
 
         if (minimumCostPerCredit <= 0)
         {
-            throw new ArgumentException("Minimum cost per credit must be greater than zero.");
+            throw new ArgumentException(
+                "Minimum cost per credit must be greater than zero.");
+        }
+
+        if (string.IsNullOrWhiteSpace(currency))
+        {
+            throw new ArgumentException(
+                "Course currency cannot be empty.",
+                nameof(currency));
         }
 
         this.Name = name;
@@ -59,6 +69,7 @@ public class Course
         this.Credits = credits;
         this.MinimumCostPerCredit = minimumCostPerCredit;
         this.Cost = cost;
+        this.Currency = currency;
     }
 
     /// <summary>
@@ -70,18 +81,28 @@ public class Course
     /// <param name="credits">The number of credits allocated to the course.</param>
     /// <param name="minimumCostPerCredit">The minimum cost per credit.</param>
     /// <param name="cost">The course cost.</param>
+    /// <param name="currency">The currency used for the course cost.</param>
     public Course(
         int id,
         string name,
         string description,
         int credits,
         decimal minimumCostPerCredit,
-        decimal cost)
-        : this(name, description, credits, minimumCostPerCredit, cost)
+        decimal cost,
+        string currency = "RON")
+        : this(
+            name,
+            description,
+            credits,
+            minimumCostPerCredit,
+            cost,
+            currency)
     {
         if (id <= 0)
         {
-            throw new ArgumentException("Course identifier must be greater than zero.", nameof(id));
+            throw new ArgumentException(
+                "Course identifier must be greater than zero.",
+                nameof(id));
         }
 
         this.Id = id;
@@ -116,6 +137,11 @@ public class Course
     /// Gets the total course cost.
     /// </summary>
     public decimal Cost { get; }
+
+    /// <summary>
+    /// Gets the currency used for the course cost.
+    /// </summary>
+    public string Currency { get; }
 
     /// <summary>
     /// Gets the prerequisites required for this course.

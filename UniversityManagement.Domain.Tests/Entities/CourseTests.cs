@@ -363,5 +363,41 @@ namespace UniversityManagement.Domain.Tests.Entities
 
             Assert.Equal(0, course.Id);
         }
+
+        /// <summary>
+        /// Verifies that a course stores its currency.
+        /// </summary>
+        [Fact]
+        public void Course_ShouldStoreCurrency()
+        {
+            var course = new Course(
+                "Programming",
+                "Introduction to programming.",
+                5,
+                100m,
+                500m,
+                "EUR");
+
+            Assert.Equal("EUR", course.Currency);
+        }
+
+        /// <summary>
+        /// Verifies that an invalid currency is rejected.
+        /// </summary>
+        /// <param name="currency">The invalid currency value.</param>
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void Course_ShouldRejectInvalidCurrency(string currency)
+        {
+            Assert.Throws<ArgumentException>(() =>
+                new Course(
+                    "Programming",
+                    "Introduction to programming.",
+                    5,
+                    100m,
+                    500m,
+                    currency));
+        }
     }
 }
