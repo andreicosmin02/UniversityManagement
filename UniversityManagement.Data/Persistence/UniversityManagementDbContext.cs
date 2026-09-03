@@ -37,6 +37,11 @@ public class UniversityManagementDbContext : DbContext
     /// </summary>
     public DbSet<Semester> Semesters => this.Set<Semester>();
 
+    /// <summary>
+    /// Gets the enrollments stored in the database.
+    /// </summary>
+    public DbSet<Enrollment> Enrollments => this.Set<Enrollment>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -101,6 +106,26 @@ public class UniversityManagementDbContext : DbContext
                 .WithMany();
 
             entity.Ignore(semester => semester.TotalAvailableCredits);
+        });
+
+        modelBuilder.Entity<Enrollment>(entity =>
+        {
+            entity.HasKey(enrollment => enrollment.Id);
+
+            entity.Property(enrollment => enrollment.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.HasOne(enrollment => enrollment.Student)
+                .WithMany()
+                .IsRequired();
+
+            entity.HasOne(enrollment => enrollment.Course)
+                .WithMany()
+                .IsRequired();
+
+            entity.HasOne(enrollment => enrollment.Semester)
+                .WithMany()
+                .IsRequired();
         });
     }
 }

@@ -267,4 +267,111 @@ public class UniversityManagementDbContextTests
             context.Database.EnsureDeleted();
         }
     }
+
+    /// <summary>
+    /// Verifies that saving an enrollment persists it and assigns a database identifier.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistEnrollment()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var student = new Student(
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "12345",
+                new[] { "0722123456" },
+                Array.Empty<string>());
+
+            var course = new Course(
+                "Mathematics",
+                "Basic mathematics",
+                5,
+                100,
+                500);
+
+            var semester = new Semester(1, 30);
+            var enrollment = new Enrollment(student, course, semester);
+
+            context.Enrollments.Add(enrollment);
+            context.SaveChanges();
+
+            Assert.True(enrollment.Id > 0);
+            Assert.Equal(1, context.Enrollments.Count());
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that an enrollment preserves its student, course, and semester.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistEnrollmentRelationships()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var student = new Student(
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "12345",
+                new[] { "0722123456" },
+                Array.Empty<string>());
+
+            var course = new Course(
+                "Mathematics",
+                "Basic mathematics",
+                5,
+                100,
+                500);
+
+            var semester = new Semester(1, 30);
+            var enrollment = new Enrollment(student, course, semester);
+
+            context.Enrollments.Add(enrollment);
+            context.SaveChanges();
+
+            context.ChangeTracker.Clear();
+
+            var storedEnrollment = context.Enrollments
+                .Include(item => item.Student)
+                .Include(item => item.Course)
+                .Include(item => item.Semester)
+                .Single();
+
+            Assert.Equal("12345", storedEnrollment.Student.RegistrationNumber);
+            Assert.Equal("Mathematics", storedEnrollment.Course.Name);
+            Assert.Equal(1, storedEnrollment.Semester.Number);
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
 }
