@@ -217,5 +217,39 @@ namespace UniversityManagement.Domain.Tests.Entities
             Assert.Throws<ArgumentNullException>(() =>
                 semester.AddCourse(null!));
         }
+
+        /// <summary>
+        /// Verifies that a new semester starts without a persistent identifier.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldStartWithZeroId()
+        {
+            var semester = new Semester(1, 30);
+
+            Assert.Equal(0, semester.Id);
+        }
+
+        /// <summary>
+        /// Verifies that an existing semester can store a persistent identifier.
+        /// </summary>
+        [Fact]
+        public void Semester_ShouldStorePositiveId()
+        {
+            var semester = new Semester(1, 1, 30);
+
+            Assert.Equal(1, semester.Id);
+        }
+
+        /// <summary>
+        /// Verifies that an existing semester rejects a non-positive identifier.
+        /// </summary>
+        /// <param name="id">The invalid identifier to test.</param>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void Semester_ShouldRejectNonPositiveId(int id)
+        {
+            Assert.Throws<ArgumentException>(() => new Semester(id, 1, 30));
+        }
     }
 }

@@ -33,6 +33,31 @@ public class Semester
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="Semester"/> class
+    /// with an existing persistent identifier.
+    /// </summary>
+    /// <param name="id">The persistent identifier.</param>
+    /// <param name="number">The semester number.</param>
+    /// <param name="minimumCredits">The minimum credits required for promotion.</param>
+    public Semester(int id, int number, int minimumCredits)
+        : this(number, minimumCredits)
+    {
+        if (id <= 0)
+        {
+            throw new ArgumentException(
+                "Semester identifier must be greater than zero.",
+                nameof(id));
+        }
+
+        this.Id = id;
+    }
+
+    /// <summary>
+    /// Gets the persistent identifier of the semester.
+    /// </summary>
+    public int Id { get; private set; }
+
+    /// <summary>
     /// Gets the semester number.
     /// </summary>
     public int Number { get; }

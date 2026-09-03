@@ -32,6 +32,11 @@ public class UniversityManagementDbContext : DbContext
     /// </summary>
     public DbSet<Student> Students => this.Set<Student>();
 
+    /// <summary>
+    /// Gets the semesters stored in the database.
+    /// </summary>
+    public DbSet<Semester> Semesters => this.Set<Semester>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -77,6 +82,25 @@ public class UniversityManagementDbContext : DbContext
 
             entity.PrimitiveCollection(student => student.Emails)
                 .HasField("emails");
+        });
+
+        modelBuilder.Entity<Semester>(entity =>
+        {
+            entity.HasKey(semester => semester.Id);
+
+            entity.Property(semester => semester.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(semester => semester.Number)
+                .IsRequired();
+
+            entity.Property(semester => semester.MinimumCredits)
+                .IsRequired();
+
+            entity.HasMany(semester => semester.Courses)
+                .WithMany();
+
+            entity.Ignore(semester => semester.TotalAvailableCredits);
         });
     }
 }

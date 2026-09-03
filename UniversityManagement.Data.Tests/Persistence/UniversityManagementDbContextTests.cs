@@ -187,4 +187,84 @@ public class UniversityManagementDbContextTests
             context.Database.EnsureDeleted();
         }
     }
+
+    /// <summary>
+    /// Verifies that saving a semester persists it and assigns a database identifier.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistSemester()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var semester = new Semester(1, 30);
+
+            context.Semesters.Add(semester);
+            context.SaveChanges();
+
+            context.ChangeTracker.Clear();
+
+            Assert.True(semester.Id > 0);
+            Assert.Equal(1, context.Semesters.Count());
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that a semester preserves its courses after persistence.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistSemesterCourses()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var course = new Course(
+                "Mathematics",
+                "Basic mathematics",
+                5,
+                100,
+                500);
+
+            var semester = new Semester(1, 30);
+            semester.AddCourse(course);
+
+            context.Semesters.Add(semester);
+            context.SaveChanges();
+
+            context.ChangeTracker.Clear();
+
+            var storedSemester = context.Semesters
+                .Include(item => item.Courses)
+                .Single();
+
+            Assert.Single(storedSemester.Courses);
+            Assert.Equal("Mathematics", storedSemester.Courses.Single().Name);
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
 }
