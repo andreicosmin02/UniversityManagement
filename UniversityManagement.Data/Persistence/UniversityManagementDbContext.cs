@@ -47,6 +47,12 @@ public class UniversityManagementDbContext : DbContext
     /// </summary>
     public DbSet<ExamAttempt> ExamAttempts => this.Set<ExamAttempt>();
 
+    /// <summary>
+    /// Gets the payment transactions stored in the database.
+    /// </summary>
+    public DbSet<PaymentTransaction> PaymentTransactions =>
+        this.Set<PaymentTransaction>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -151,6 +157,24 @@ public class UniversityManagementDbContext : DbContext
                 .IsRequired();
 
             entity.Ignore(attempt => attempt.Passed);
+        });
+
+        modelBuilder.Entity<PaymentTransaction>(entity =>
+        {
+            entity.HasKey(transaction => transaction.Id);
+
+            entity.Property(transaction => transaction.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(transaction => transaction.Amount)
+                .IsRequired();
+
+            entity.Property(transaction => transaction.TransactionDate)
+                .IsRequired();
+
+            entity.HasOne(transaction => transaction.Student)
+                .WithMany()
+                .IsRequired();
         });
     }
 }

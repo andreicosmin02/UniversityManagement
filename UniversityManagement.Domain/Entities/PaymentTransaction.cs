@@ -38,17 +38,55 @@ public class PaymentTransaction
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="PaymentTransaction"/> class
+    /// with an existing persistent identifier.
+    /// </summary>
+    /// <param name="id">The persistent identifier.</param>
+    /// <param name="student">The student associated with the transaction.</param>
+    /// <param name="amount">The transaction amount.</param>
+    /// <param name="transactionDate">The transaction date.</param>
+    public PaymentTransaction(
+        int id,
+        Student student,
+        decimal amount,
+        DateTime transactionDate)
+        : this(student, amount, transactionDate)
+    {
+        if (id <= 0)
+        {
+            throw new ArgumentException(
+                "Payment transaction identifier must be greater than zero.",
+                nameof(id));
+        }
+
+        this.Id = id;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PaymentTransaction"/> class for persistence.
+    /// </summary>
+    private PaymentTransaction()
+    {
+        this.Student = null!;
+    }
+
+    /// <summary>
+    /// Gets the persistent identifier of the payment transaction.
+    /// </summary>
+    public int Id { get; private set; }
+
+    /// <summary>
     /// Gets the student associated with the transaction.
     /// </summary>
-    public Student Student { get; }
+    public Student Student { get; private set; }
 
     /// <summary>
     /// Gets the transaction amount.
     /// </summary>
-    public decimal Amount { get; }
+    public decimal Amount { get; private set; }
 
     /// <summary>
     /// Gets the transaction date.
     /// </summary>
-    public DateTime TransactionDate { get; }
+    public DateTime TransactionDate { get; private set; }
 }

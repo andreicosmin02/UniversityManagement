@@ -72,4 +72,77 @@ public class PaymentTransactionTests
             new[] { "0722123456" },
             Array.Empty<string>());
     }
+
+    /// <summary>
+    /// Verifies that a new payment transaction starts without a persistent identifier.
+    /// </summary>
+    [Fact]
+    public void PaymentTransaction_ShouldStartWithZeroId()
+    {
+        var student = new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "12345",
+            new[] { "0722123456" },
+            Array.Empty<string>());
+
+        var transaction = new PaymentTransaction(
+            student,
+            500m,
+            new DateTime(2026, 6, 10));
+
+        Assert.Equal(0, transaction.Id);
+    }
+
+    /// <summary>
+    /// Verifies that an existing payment transaction can store a persistent identifier.
+    /// </summary>
+    [Fact]
+    public void PaymentTransaction_ShouldStorePositiveId()
+    {
+        var student = new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "12345",
+            new[] { "0722123456" },
+            Array.Empty<string>());
+
+        var transaction = new PaymentTransaction(
+            1,
+            student,
+            500m,
+            new DateTime(2026, 6, 10));
+
+        Assert.Equal(1, transaction.Id);
+    }
+
+    /// <summary>
+    /// Verifies that an existing payment transaction rejects a non-positive identifier.
+    /// </summary>
+    /// <param name="id">The invalid identifier to test.</param>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void PaymentTransaction_ShouldRejectNonPositiveId(int id)
+    {
+        var student = new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "12345",
+            new[] { "0722123456" },
+            Array.Empty<string>());
+
+        Assert.Throws<ArgumentException>(
+            () => new PaymentTransaction(
+                id,
+                student,
+                500m,
+                new DateTime(2026, 6, 10)));
+    }
 }

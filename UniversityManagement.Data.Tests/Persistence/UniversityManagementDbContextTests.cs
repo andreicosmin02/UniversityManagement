@@ -465,4 +465,101 @@ public class UniversityManagementDbContextTests
             context.Database.EnsureDeleted();
         }
     }
+
+    /// <summary>
+    /// Verifies that saving a payment transaction persists it and assigns a database identifier.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistPaymentTransaction()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var student = new Student(
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "12345",
+                new[] { "0722123456" },
+                Array.Empty<string>());
+
+            var transaction = new PaymentTransaction(
+                student,
+                500m,
+                new DateTime(2026, 6, 10));
+
+            context.PaymentTransactions.Add(transaction);
+            context.SaveChanges();
+
+            Assert.True(transaction.Id > 0);
+            Assert.Equal(1, context.PaymentTransactions.Count());
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that a payment transaction preserves its student and transaction data.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistPaymentTransactionRelationship()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var student = new Student(
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "12345",
+                new[] { "0722123456" },
+                Array.Empty<string>());
+
+            var transaction = new PaymentTransaction(
+                student,
+                -200m,
+                new DateTime(2026, 6, 10));
+
+            context.PaymentTransactions.Add(transaction);
+            context.SaveChanges();
+
+            context.ChangeTracker.Clear();
+
+            var storedTransaction = context.PaymentTransactions
+                .Include(item => item.Student)
+                .Single();
+
+            Assert.Equal("12345", storedTransaction.Student.RegistrationNumber);
+            Assert.Equal(-200m, storedTransaction.Amount);
+            Assert.Equal(
+                new DateTime(2026, 6, 10),
+                storedTransaction.TransactionDate);
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
 }
