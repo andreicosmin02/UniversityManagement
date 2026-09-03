@@ -59,10 +59,10 @@ public class EnrollmentRepositoryTests
     }
 
     /// <summary>
-    /// Verifies that an existing enrollment can be retrieved by identifier.
+    /// Verifies that an enrollment and all required relationships can be retrieved.
     /// </summary>
     [Fact]
-    public void GetById_ShouldReturnStoredEnrollment()
+    public void GetById_ShouldLoadRelationships()
     {
         var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
         var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
@@ -97,6 +97,9 @@ public class EnrollmentRepositoryTests
 
             Assert.NotNull(storedEnrollment);
             Assert.Equal(enrollment.Id, storedEnrollment.Id);
+            Assert.Equal("12345", storedEnrollment.Student.RegistrationNumber);
+            Assert.Equal("Math", storedEnrollment.Course.Name);
+            Assert.Equal(1, storedEnrollment.Semester.Number);
         }
         finally
         {

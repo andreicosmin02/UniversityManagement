@@ -104,4 +104,69 @@ public class EnrollmentTests
         Assert.Throws<ArgumentException>(
             () => new Enrollment(id, student, course, semester));
     }
+
+    /// <summary>
+    /// Verifies that an enrollment rejects a null student.
+    /// </summary>
+    [Fact]
+    public void Enrollment_ShouldRejectNullStudent()
+    {
+        var course = new Course("Math", "Mathematics", 5, 100m, 500m);
+        var semester = new Semester(1, 0);
+
+        Assert.Throws<ArgumentNullException>(
+            () => new Enrollment(null!, course, semester));
+    }
+
+    /// <summary>
+    /// Verifies that an enrollment rejects a null course.
+    /// </summary>
+    [Fact]
+    public void Enrollment_ShouldRejectNullCourse()
+    {
+        var student = CreateStudent();
+        var semester = new Semester(1, 0);
+
+        Assert.Throws<ArgumentNullException>(
+            () => new Enrollment(student, null!, semester));
+    }
+
+    /// <summary>
+    /// Verifies that an enrollment rejects a null semester.
+    /// </summary>
+    [Fact]
+    public void Enrollment_ShouldRejectNullSemester()
+    {
+        var student = CreateStudent();
+        var course = new Course("Math", "Mathematics", 5, 100m, 500m);
+
+        Assert.Throws<ArgumentNullException>(
+            () => new Enrollment(student, course, null!));
+    }
+
+    /// <summary>
+    /// Verifies that Entity Framework can use the non-public persistence constructor.
+    /// </summary>
+    [Fact]
+    public void Enrollment_ShouldProvidePersistenceConstructor()
+    {
+        var enrollment = Activator.CreateInstance(
+            typeof(Enrollment),
+            nonPublic: true);
+
+        var typedEnrollment = Assert.IsType<Enrollment>(enrollment);
+        Assert.Equal(0, typedEnrollment.Id);
+    }
+
+    private static Student CreateStudent()
+    {
+        return new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "S001",
+            new[] { "0722123456" },
+            Array.Empty<string>());
+    }
 }

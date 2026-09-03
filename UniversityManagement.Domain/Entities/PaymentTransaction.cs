@@ -25,6 +25,8 @@ public class PaymentTransaction
         decimal amount,
         DateTime transactionDate)
     {
+        ArgumentNullException.ThrowIfNull(student);
+
         if (amount == 0m)
         {
             throw new ArgumentOutOfRangeException(

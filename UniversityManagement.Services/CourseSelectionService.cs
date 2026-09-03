@@ -104,13 +104,19 @@ public class CourseSelectionService
         IEnumerable<Enrollment> existingEnrollments,
         IEnumerable<ExamAttempt> examAttempts)
     {
+        ArgumentNullException.ThrowIfNull(student);
+        ArgumentNullException.ThrowIfNull(course);
+        ArgumentNullException.ThrowIfNull(semester);
+        ArgumentNullException.ThrowIfNull(existingEnrollments);
         ArgumentNullException.ThrowIfNull(examAttempts);
 
         foreach (var prerequisite in course.Prerequisites)
         {
             var prerequisiteSatisfied = examAttempts.Any(
                 attempt =>
-                    ReferenceEquals(attempt.Course, prerequisite.RequiredCourse)
+                    ReferenceEquals(attempt.Student, student)
+                    && ReferenceEquals(attempt.Course, prerequisite.RequiredCourse)
+                    && attempt.Passed
                     && attempt.Grade >= prerequisite.MinimumGrade);
 
             if (!prerequisiteSatisfied)
@@ -125,5 +131,38 @@ public class CourseSelectionService
             course,
             semester,
             existingEnrollments);
+    }
+
+    /// <summary>
+    /// Validates that a student's distinct course selections reach a semester's credit threshold.
+    /// </summary>
+    /// <param name="student">The student whose selections are evaluated.</param>
+    /// <param name="semester">The semester whose threshold must be reached.</param>
+    /// <param name="enrollments">The enrollments to evaluate.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the selected courses do not provide enough credits.
+    /// </exception>
+    public void ValidateMinimumSelectedCredits(
+        Student student,
+        Semester semester,
+        IEnumerable<Enrollment> enrollments)
+    {
+        ArgumentNullException.ThrowIfNull(student);
+        ArgumentNullException.ThrowIfNull(semester);
+        ArgumentNullException.ThrowIfNull(enrollments);
+
+        var selectedCredits = enrollments
+            .Where(enrollment =>
+                ReferenceEquals(enrollment.Student, student)
+                && ReferenceEquals(enrollment.Semester, semester))
+            .Select(enrollment => enrollment.Course)
+            .Distinct()
+            .Sum(course => course.Credits);
+
+        if (selectedCredits < semester.MinimumCredits)
+        {
+            throw new InvalidOperationException(
+                "The selected courses do not meet the semester minimum credit threshold.");
+        }
     }
 }

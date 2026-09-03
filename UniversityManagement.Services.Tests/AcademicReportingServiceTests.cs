@@ -42,9 +42,77 @@ public class AcademicReportingServiceTests
 
         var service = new AcademicReportingService();
 
-        var credits = service.GetEarnedCredits(semester, attempts);
+        var credits = service.GetEarnedCredits(student, semester, attempts);
 
         Assert.Equal(6, credits);
+    }
+
+    /// <summary>
+    /// Verifies that another student's attempts do not contribute earned credits.
+    /// </summary>
+    [Fact]
+    public void GetEarnedCredits_ShouldIgnoreOtherStudentsAttempts()
+    {
+        var student = CreateStudent("S001");
+        var otherStudent = CreateStudent("S002");
+        var course = new Course("A", "Course A", 6, 100m, 600m);
+        var semester = new Semester(1, 0);
+        semester.AddCourse(course);
+        var attempts = new[]
+        {
+            new ExamAttempt(otherStudent, course, 10, new DateTime(2026, 6, 1)),
+        };
+        var service = new AcademicReportingService();
+
+        var credits = service.GetEarnedCredits(student, semester, attempts);
+
+        Assert.Equal(0, credits);
+    }
+
+    /// <summary>
+    /// Verifies that earned-credit reporting rejects a null student.
+    /// </summary>
+    [Fact]
+    public void GetEarnedCredits_ShouldRejectNullStudent()
+    {
+        var semester = new Semester(1, 0);
+        var service = new AcademicReportingService();
+
+        Assert.Throws<ArgumentNullException>(
+            () => service.GetEarnedCredits(
+                null!,
+                semester,
+                Array.Empty<ExamAttempt>()));
+    }
+
+    /// <summary>
+    /// Verifies that earned-credit reporting rejects a null semester.
+    /// </summary>
+    [Fact]
+    public void GetEarnedCredits_ShouldRejectNullSemester()
+    {
+        var student = CreateStudent("S001");
+        var service = new AcademicReportingService();
+
+        Assert.Throws<ArgumentNullException>(
+            () => service.GetEarnedCredits(
+                student,
+                null!,
+                Array.Empty<ExamAttempt>()));
+    }
+
+    /// <summary>
+    /// Verifies that earned-credit reporting rejects a null exam history.
+    /// </summary>
+    [Fact]
+    public void GetEarnedCredits_ShouldRejectNullExamAttempts()
+    {
+        var student = CreateStudent("S001");
+        var semester = new Semester(1, 0);
+        var service = new AcademicReportingService();
+
+        Assert.Throws<ArgumentNullException>(
+            () => service.GetEarnedCredits(student, semester, null!));
     }
 
     /// <summary>
@@ -229,6 +297,42 @@ public class AcademicReportingServiceTests
                 },
             };
 
+        var service = new AcademicReportingService();
+
+        var count = service.GetIntegralStudentCount(
+            new[] { student },
+            enrollments,
+            attemptsByStudent);
+
+        Assert.Equal(0, count);
+    }
+
+    /// <summary>
+    /// Verifies that dictionary entries cannot contain another student's attempts.
+    /// </summary>
+    [Fact]
+    public void GetIntegralStudentCount_ShouldIgnoreAttemptsBelongingToDifferentStudent()
+    {
+        var student = CreateStudent("S001");
+        var otherStudent = CreateStudent("S002");
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var semester = new Semester(1, 0);
+        var enrollments = new[]
+        {
+            new Enrollment(student, course, semester),
+        };
+        var attemptsByStudent =
+            new Dictionary<Student, IEnumerable<ExamAttempt>>
+            {
+                [student] = new[]
+                {
+                    new ExamAttempt(
+                        otherStudent,
+                        course,
+                        10,
+                        new DateTime(2026, 6, 1)),
+                },
+            };
         var service = new AcademicReportingService();
 
         var count = service.GetIntegralStudentCount(

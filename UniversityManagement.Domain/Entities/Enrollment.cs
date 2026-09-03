@@ -17,6 +17,10 @@ public class Enrollment
     /// <param name="semester">The semester in which the course is selected.</param>
     public Enrollment(Student student, Course course, Semester semester)
     {
+        ArgumentNullException.ThrowIfNull(student);
+        ArgumentNullException.ThrowIfNull(course);
+        ArgumentNullException.ThrowIfNull(semester);
+
         this.Student = student;
         this.Course = course;
         this.Semester = semester;

@@ -4,6 +4,7 @@
 
 namespace UniversityManagement.Data.Repositories;
 
+using Microsoft.EntityFrameworkCore;
 using UniversityManagement.Data.Persistence;
 using UniversityManagement.Domain.Entities;
 
@@ -40,6 +41,8 @@ public class SemesterRepository
     /// <returns>The matching semester, or <see langword="null"/> if none exists.</returns>
     public Semester? GetById(int id)
     {
-        return this.context.Semesters.Find(id);
+        return this.context.Semesters
+            .Include(semester => semester.Courses)
+            .SingleOrDefault(semester => semester.Id == id);
     }
 }

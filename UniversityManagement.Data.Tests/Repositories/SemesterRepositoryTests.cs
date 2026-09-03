@@ -48,10 +48,10 @@ public class SemesterRepositoryTests
     }
 
     /// <summary>
-    /// Verifies that an existing semester can be retrieved by identifier.
+    /// Verifies that a semester and its courses can be retrieved.
     /// </summary>
     [Fact]
-    public void GetById_ShouldReturnStoredSemester()
+    public void GetById_ShouldLoadCourses()
     {
         var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
         var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
@@ -67,6 +67,8 @@ public class SemesterRepositoryTests
 
             var repository = new SemesterRepository(context);
             var semester = new Semester(1, 30);
+            semester.AddCourse(
+                new Course("Math", "Mathematics", 5, 100m, 500m));
 
             repository.Add(semester);
 
@@ -77,6 +79,8 @@ public class SemesterRepositoryTests
             Assert.NotNull(storedSemester);
             Assert.Equal(1, storedSemester.Number);
             Assert.Equal(30, storedSemester.MinimumCredits);
+            Assert.Single(storedSemester.Courses);
+            Assert.Equal("Math", storedSemester.Courses.Single().Name);
         }
         finally
         {

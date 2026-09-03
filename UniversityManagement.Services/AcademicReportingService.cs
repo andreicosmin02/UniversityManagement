@@ -14,22 +14,26 @@ using UniversityManagement.Domain.Entities;
 public class AcademicReportingService
 {
     /// <summary>
-    /// Gets the number of credits earned in a semester.
+    /// Gets the number of credits earned by a student in a semester.
     /// </summary>
+    /// <param name="student">The student to evaluate.</param>
     /// <param name="semester">The semester to evaluate.</param>
-    /// <param name="examAttempts">The student's exam attempts.</param>
+    /// <param name="examAttempts">The exam attempts to evaluate.</param>
     /// <returns>The number of earned credits.</returns>
     public int GetEarnedCredits(
+        Student student,
         Semester semester,
         IEnumerable<ExamAttempt> examAttempts)
     {
+        ArgumentNullException.ThrowIfNull(student);
         ArgumentNullException.ThrowIfNull(semester);
         ArgumentNullException.ThrowIfNull(examAttempts);
 
         return semester.Courses
             .Where(course => examAttempts.Any(
                 attempt =>
-                    ReferenceEquals(attempt.Course, course)
+                    ReferenceEquals(attempt.Student, student)
+                    && ReferenceEquals(attempt.Course, course)
                     && attempt.Passed))
             .Sum(course => course.Credits);
     }
@@ -137,7 +141,8 @@ public class AcademicReportingService
             return selectedCourses.All(
                 course => examAttempts.Any(
                     attempt =>
-                        ReferenceEquals(attempt.Course, course)
+                        ReferenceEquals(attempt.Student, student)
+                        && ReferenceEquals(attempt.Course, course)
                         && attempt.Passed));
         });
     }

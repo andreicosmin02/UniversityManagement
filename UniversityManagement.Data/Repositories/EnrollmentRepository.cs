@@ -4,6 +4,7 @@
 
 namespace UniversityManagement.Data.Repositories;
 
+using Microsoft.EntityFrameworkCore;
 using UniversityManagement.Data.Persistence;
 using UniversityManagement.Domain.Entities;
 
@@ -42,6 +43,10 @@ public class EnrollmentRepository
     /// </returns>
     public Enrollment? GetById(int id)
     {
-        return this.context.Enrollments.Find(id);
+        return this.context.Enrollments
+            .Include(enrollment => enrollment.Student)
+            .Include(enrollment => enrollment.Course)
+            .Include(enrollment => enrollment.Semester)
+            .SingleOrDefault(enrollment => enrollment.Id == id);
     }
 }

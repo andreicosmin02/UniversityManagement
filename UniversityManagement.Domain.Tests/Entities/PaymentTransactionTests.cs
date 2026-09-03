@@ -62,6 +62,19 @@ public class PaymentTransactionTests
     }
 
     /// <summary>
+    /// Verifies that a payment transaction rejects a null student.
+    /// </summary>
+    [Fact]
+    public void PaymentTransaction_ShouldRejectNullStudent()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new PaymentTransaction(
+                null!,
+                500m,
+                new DateTime(2026, 6, 1)));
+    }
+
+    /// <summary>
     /// Verifies that a new payment transaction starts without a persistent identifier.
     /// </summary>
     [Fact]

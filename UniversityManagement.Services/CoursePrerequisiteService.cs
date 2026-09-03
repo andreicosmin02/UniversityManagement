@@ -12,28 +12,6 @@ using UniversityManagement.Domain.Entities;
 public class CoursePrerequisiteService
 {
     /// <summary>
-    /// Adds a prerequisite to a course when it does not create a circular dependency.
-    /// </summary>
-    /// <param name="course">The course that receives the prerequisite.</param>
-    /// <param name="prerequisite">The prerequisite to add.</param>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when adding the prerequisite would create a circular dependency.
-    /// </exception>
-    public void AddPrerequisite(Course course, Prerequisite prerequisite)
-    {
-        ArgumentNullException.ThrowIfNull(course);
-        ArgumentNullException.ThrowIfNull(prerequisite);
-
-        if (HasPathToCourse(prerequisite.RequiredCourse, course))
-        {
-            throw new InvalidOperationException(
-                "Adding this prerequisite would create a circular dependency.");
-        }
-
-        course.AddPrerequisite(prerequisite);
-    }
-
-    /// <summary>
     /// Adds a prerequisite when the required course is available in an earlier semester.
     /// </summary>
     /// <param name="course">The course that receives the prerequisite.</param>
@@ -43,24 +21,35 @@ public class CoursePrerequisiteService
     /// Thrown when the required course is not available before a semester containing the course.
     /// </exception>
     public void AddPrerequisite(
-    Course course,
-    Prerequisite prerequisite,
-    IEnumerable<Semester> semesters)
+        Course course,
+        Prerequisite prerequisite,
+        IEnumerable<Semester> semesters)
     {
         ArgumentNullException.ThrowIfNull(course);
         ArgumentNullException.ThrowIfNull(prerequisite);
+        ArgumentNullException.ThrowIfNull(semesters);
 
-        var courseSemesters = semesters
-            .Where(semester => semester.Courses.Contains(course));
+        var semesterList = semesters.ToList();
 
-        if (!courseSemesters.Any())
+        var courseSemesters = semesterList
+            .Where(semester => semester.Courses.Contains(course))
+            .ToList();
+
+        if (courseSemesters.Count == 0)
         {
             throw new InvalidOperationException(
                 "The course must be assigned to at least one semester.");
         }
 
-        var requiredCourseSemesters = semesters
-            .Where(semester => semester.Courses.Contains(prerequisite.RequiredCourse));
+        if (courseSemesters.Any(semester => semester.Number == 1))
+        {
+            throw new InvalidOperationException(
+                "A course offered in the first semester cannot have prerequisites.");
+        }
+
+        var requiredCourseSemesters = semesterList
+            .Where(semester => semester.Courses.Contains(prerequisite.RequiredCourse))
+            .ToList();
 
         if (courseSemesters.Any(
             courseSemester => !requiredCourseSemesters.Any(
@@ -70,7 +59,25 @@ public class CoursePrerequisiteService
                 "The prerequisite course must be available in an earlier semester.");
         }
 
-        this.AddPrerequisite(course, prerequisite);
+        AddPrerequisiteAfterCycleCheck(course, prerequisite);
+    }
+
+    /// <summary>
+    /// Adds a prerequisite after validating that it does not create a cycle.
+    /// </summary>
+    /// <param name="course">The course that receives the prerequisite.</param>
+    /// <param name="prerequisite">The prerequisite to add.</param>
+    private static void AddPrerequisiteAfterCycleCheck(
+        Course course,
+        Prerequisite prerequisite)
+    {
+        if (HasPathToCourse(prerequisite.RequiredCourse, course))
+        {
+            throw new InvalidOperationException(
+                "Adding this prerequisite would create a circular dependency.");
+        }
+
+        course.AddPrerequisite(prerequisite);
     }
 
     /// <summary>

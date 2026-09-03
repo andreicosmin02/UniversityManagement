@@ -89,6 +89,7 @@ public class ExamService
             var prerequisiteSatisfied = studentAttempts.Any(
                 attempt =>
                     ReferenceEquals(attempt.Course, prerequisite.RequiredCourse)
+                    && attempt.Passed
                     && attempt.Grade >= prerequisite.MinimumGrade);
 
             if (!prerequisiteSatisfied)

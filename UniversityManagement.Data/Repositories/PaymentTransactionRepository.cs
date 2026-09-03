@@ -4,6 +4,7 @@
 
 namespace UniversityManagement.Data.Repositories;
 
+using Microsoft.EntityFrameworkCore;
 using UniversityManagement.Data.Persistence;
 using UniversityManagement.Domain.Entities;
 
@@ -42,6 +43,8 @@ public class PaymentTransactionRepository
     /// </returns>
     public PaymentTransaction? GetById(int id)
     {
-        return this.context.PaymentTransactions.Find(id);
+        return this.context.PaymentTransactions
+            .Include(transaction => transaction.Student)
+            .SingleOrDefault(transaction => transaction.Id == id);
     }
 }

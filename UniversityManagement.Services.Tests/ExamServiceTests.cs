@@ -156,6 +156,35 @@ public class ExamServiceTests
     }
 
     /// <summary>
+    /// Verifies that two different students may take exams on the same day.
+    /// </summary>
+    [Fact]
+    public void RegisterAttempt_ShouldAllowDifferentStudentToTakeExamOnSameDay()
+    {
+        var student = CreateStudent("S001");
+        var otherStudent = CreateStudent("S002");
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var previousAttempts = new[]
+        {
+            new ExamAttempt(
+                otherStudent,
+                course,
+                7,
+                new DateTime(2026, 6, 10, 9, 0, 0)),
+        };
+        var service = new ExamService(3);
+
+        var attempt = service.RegisterAttempt(
+            student,
+            course,
+            8,
+            new DateTime(2026, 6, 10, 15, 0, 0),
+            previousAttempts);
+
+        Assert.Same(student, attempt.Student);
+    }
+
+    /// <summary>
     /// Verifies that a null exam history is rejected.
     /// </summary>
     [Fact]
@@ -261,6 +290,109 @@ public class ExamServiceTests
     }
 
     /// <summary>
+    /// Verifies that attempts belonging to another student do not exhaust the maximum.
+    /// </summary>
+    [Fact]
+    public void RegisterAttempt_ShouldIgnoreOtherStudentsAttemptsForMaximum()
+    {
+        var student = CreateStudent("S001");
+        var otherStudent = CreateStudent("S002");
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var previousAttempts = new[]
+        {
+            new ExamAttempt(otherStudent, course, 2, new DateTime(2026, 6, 1)),
+            new ExamAttempt(otherStudent, course, 3, new DateTime(2026, 6, 2)),
+            new ExamAttempt(otherStudent, course, 4, new DateTime(2026, 6, 3)),
+        };
+        var service = new ExamService(3);
+
+        var attempt = service.RegisterAttempt(
+            student,
+            course,
+            8,
+            new DateTime(2026, 6, 4),
+            previousAttempts);
+
+        Assert.Same(student, attempt.Student);
+    }
+
+    /// <summary>
+    /// Verifies that another student's passing attempt does not block an exam.
+    /// </summary>
+    [Fact]
+    public void RegisterAttempt_ShouldIgnoreOtherStudentsPassingAttempt()
+    {
+        var student = CreateStudent("S001");
+        var otherStudent = CreateStudent("S002");
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+        var previousAttempts = new[]
+        {
+            new ExamAttempt(otherStudent, course, 10, new DateTime(2026, 6, 1)),
+        };
+        var service = new ExamService(3);
+
+        var attempt = service.RegisterAttempt(
+            student,
+            course,
+            8,
+            new DateTime(2026, 6, 2),
+            previousAttempts);
+
+        Assert.Same(student, attempt.Student);
+    }
+
+    /// <summary>
+    /// Verifies that another student's prerequisite result cannot authorize an exam.
+    /// </summary>
+    [Fact]
+    public void RegisterAttempt_ShouldRejectPrerequisitePassedOnlyByDifferentStudent()
+    {
+        var student = CreateStudent("S001");
+        var otherStudent = CreateStudent("S002");
+        var requiredCourse = new Course("A", "Course A", 5, 100m, 500m);
+        var course = new Course("B", "Course B", 5, 100m, 500m);
+        course.AddPrerequisite(new Prerequisite(requiredCourse, 5));
+        var previousAttempts = new[]
+        {
+            new ExamAttempt(otherStudent, requiredCourse, 10, new DateTime(2026, 6, 1)),
+        };
+        var service = new ExamService(3);
+
+        Assert.Throws<InvalidOperationException>(
+            () => service.RegisterAttempt(
+                student,
+                course,
+                8,
+                new DateTime(2026, 6, 2),
+                previousAttempts));
+    }
+
+    /// <summary>
+    /// Verifies that a failed prerequisite never authorizes an exam.
+    /// </summary>
+    [Fact]
+    public void RegisterAttempt_ShouldRejectFailedPrerequisiteEvenWhenConfiguredMinimumIsBelowFive()
+    {
+        var student = CreateStudent("S001");
+        var requiredCourse = new Course("A", "Course A", 5, 100m, 500m);
+        var course = new Course("B", "Course B", 5, 100m, 500m);
+        course.AddPrerequisite(new Prerequisite(requiredCourse, 3));
+        var previousAttempts = new[]
+        {
+            new ExamAttempt(student, requiredCourse, 4, new DateTime(2026, 6, 1)),
+        };
+        var service = new ExamService(3);
+
+        Assert.Throws<InvalidOperationException>(
+            () => service.RegisterAttempt(
+                student,
+                course,
+                8,
+                new DateTime(2026, 6, 2),
+                previousAttempts));
+    }
+
+    /// <summary>
     /// Verifies that another attempt is rejected after reaching the maximum.
     /// </summary>
     [Fact]
@@ -346,14 +478,14 @@ public class ExamServiceTests
             () => new ExamService(maximumAttempts));
     }
 
-    private static Student CreateStudent()
+    private static Student CreateStudent(string registrationNumber = "S001")
     {
         return new Student(
             "Ion",
             "Popescu",
             "Brasov",
             "1234567890123",
-            "S001",
+            registrationNumber,
             new[] { "0722123456" },
             Array.Empty<string>());
     }

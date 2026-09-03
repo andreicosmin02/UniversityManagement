@@ -23,6 +23,31 @@ public class DiscountRule
     /// </exception>
     public DiscountRule(IEnumerable<Course> courses, decimal percentage)
     {
+        ArgumentNullException.ThrowIfNull(courses);
+
+        var courseList = courses.ToList();
+
+        if (courseList.Count == 0)
+        {
+            throw new ArgumentException(
+                "The discount combination must contain at least one course.",
+                nameof(courses));
+        }
+
+        if (courseList.Any(course => course is null))
+        {
+            throw new ArgumentException(
+                "The discount combination cannot contain a null course.",
+                nameof(courses));
+        }
+
+        if (courseList.Distinct().Count() != courseList.Count)
+        {
+            throw new ArgumentException(
+                "The discount combination cannot contain duplicate courses.",
+                nameof(courses));
+        }
+
         if (percentage <= 0m || percentage > 100m)
         {
             throw new ArgumentOutOfRangeException(
@@ -30,7 +55,7 @@ public class DiscountRule
                 "The discount percentage must be between 1 and 100.");
         }
 
-        this.courses = new List<Course>(courses);
+        this.courses = courseList;
         this.Percentage = percentage;
     }
 

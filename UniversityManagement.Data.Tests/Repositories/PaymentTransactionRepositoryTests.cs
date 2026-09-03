@@ -61,10 +61,10 @@ public class PaymentTransactionRepositoryTests
     }
 
     /// <summary>
-    /// Verifies that an existing payment transaction can be retrieved by identifier.
+    /// Verifies that a payment transaction and its student can be retrieved.
     /// </summary>
     [Fact]
-    public void GetById_ShouldReturnStoredPaymentTransaction()
+    public void GetById_ShouldLoadStudent()
     {
         var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
         var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
@@ -104,6 +104,7 @@ public class PaymentTransactionRepositoryTests
             Assert.Equal(
                 new DateTime(2026, 6, 10),
                 storedTransaction.TransactionDate);
+            Assert.Equal("12345", storedTransaction.Student.RegistrationNumber);
         }
         finally
         {

@@ -22,13 +22,18 @@ public class CoursePrerequisiteServiceTests
         var courseB = new Course("B", "Course B", 5, 100m, 500m);
 
         courseA.AddPrerequisite(new Prerequisite(courseB, 5));
+        var semesterOne = new Semester(1, 0);
+        semesterOne.AddCourse(courseA);
+        var semesterTwo = new Semester(2, 0);
+        semesterTwo.AddCourse(courseB);
 
         var service = new CoursePrerequisiteService();
 
         Assert.Throws<InvalidOperationException>(
             () => service.AddPrerequisite(
                 courseB,
-                new Prerequisite(courseA, 5)));
+                new Prerequisite(courseA, 5),
+                new[] { semesterOne, semesterTwo }));
     }
 
     /// <summary>
@@ -43,13 +48,20 @@ public class CoursePrerequisiteServiceTests
 
         courseA.AddPrerequisite(new Prerequisite(courseB, 5));
         courseB.AddPrerequisite(new Prerequisite(courseC, 5));
+        var semesterOne = new Semester(1, 0);
+        semesterOne.AddCourse(courseA);
+        var semesterTwo = new Semester(2, 0);
+        semesterTwo.AddCourse(courseB);
+        var semesterThree = new Semester(3, 0);
+        semesterThree.AddCourse(courseC);
 
         var service = new CoursePrerequisiteService();
 
         Assert.Throws<InvalidOperationException>(
             () => service.AddPrerequisite(
                 courseC,
-                new Prerequisite(courseA, 5)));
+                new Prerequisite(courseA, 5),
+                new[] { semesterOne, semesterTwo, semesterThree }));
     }
 
     /// <summary>
@@ -63,11 +75,18 @@ public class CoursePrerequisiteServiceTests
         var courseC = new Course("C", "Course C", 5, 100m, 500m);
 
         courseA.AddPrerequisite(new Prerequisite(courseB, 5));
+        var semesterOne = new Semester(1, 0);
+        semesterOne.AddCourse(courseA);
+        var semesterTwo = new Semester(2, 0);
+        semesterTwo.AddCourse(courseC);
 
         var prerequisite = new Prerequisite(courseA, 5);
         var service = new CoursePrerequisiteService();
 
-        service.AddPrerequisite(courseC, prerequisite);
+        service.AddPrerequisite(
+            courseC,
+            prerequisite,
+            new[] { semesterOne, semesterTwo });
 
         Assert.Contains(prerequisite, courseC.Prerequisites);
     }
@@ -80,10 +99,15 @@ public class CoursePrerequisiteServiceTests
     {
         var requiredCourse = new Course("B", "Course B", 5, 100m, 500m);
         var prerequisite = new Prerequisite(requiredCourse, 5);
+        var semester = new Semester(1, 0);
+        semester.AddCourse(requiredCourse);
         var service = new CoursePrerequisiteService();
 
         Assert.Throws<ArgumentNullException>(
-            () => service.AddPrerequisite(null!, prerequisite));
+            () => service.AddPrerequisite(
+                null!,
+                prerequisite,
+                new[] { semester }));
     }
 
     /// <summary>
@@ -93,10 +117,15 @@ public class CoursePrerequisiteServiceTests
     public void AddPrerequisite_ShouldRejectNullPrerequisite()
     {
         var course = new Course("A", "Course A", 5, 100m, 500m);
+        var semester = new Semester(2, 0);
+        semester.AddCourse(course);
         var service = new CoursePrerequisiteService();
 
         Assert.Throws<ArgumentNullException>(
-            () => service.AddPrerequisite(course, null!));
+            () => service.AddPrerequisite(
+                course,
+                null!,
+                new[] { semester }));
     }
 
     /// <summary>
@@ -181,5 +210,63 @@ public class CoursePrerequisiteServiceTests
                 course,
                 null!,
                 new[] { semester }));
+    }
+
+    /// <summary>
+    /// Verifies that a course in the first semester cannot have prerequisites.
+    /// </summary>
+    [Fact]
+    public void AddPrerequisite_ShouldRejectPrerequisiteForFirstSemesterCourse()
+    {
+        var requiredCourse = new Course("A", "Course A", 5, 100m, 500m);
+        var course = new Course("B", "Course B", 5, 100m, 500m);
+        var semester = new Semester(1, 0);
+        semester.AddCourse(requiredCourse);
+        semester.AddCourse(course);
+        var service = new CoursePrerequisiteService();
+
+        Assert.Throws<InvalidOperationException>(
+            () => service.AddPrerequisite(
+                course,
+                new Prerequisite(requiredCourse, 5),
+                new[] { semester }));
+    }
+
+    /// <summary>
+    /// Verifies that an earlier-semester course is accepted as a prerequisite.
+    /// </summary>
+    [Fact]
+    public void AddPrerequisite_ShouldAcceptRequiredCourseFromEarlierSemester()
+    {
+        var requiredCourse = new Course("A", "Course A", 5, 100m, 500m);
+        var course = new Course("B", "Course B", 5, 100m, 500m);
+        var semesterOne = new Semester(1, 0);
+        semesterOne.AddCourse(requiredCourse);
+        var semesterTwo = new Semester(2, 0);
+        semesterTwo.AddCourse(course);
+        var prerequisite = new Prerequisite(requiredCourse, 5);
+        var service = new CoursePrerequisiteService();
+
+        service.AddPrerequisite(
+            course,
+            prerequisite,
+            new[] { semesterOne, semesterTwo });
+
+        Assert.Contains(prerequisite, course.Prerequisites);
+    }
+
+    /// <summary>
+    /// Verifies that contextual prerequisite validation rejects null semesters.
+    /// </summary>
+    [Fact]
+    public void AddPrerequisite_WithSemesters_ShouldRejectNullSemesters()
+    {
+        var requiredCourse = new Course("A", "Course A", 5, 100m, 500m);
+        var course = new Course("B", "Course B", 5, 100m, 500m);
+        var prerequisite = new Prerequisite(requiredCourse, 5);
+        var service = new CoursePrerequisiteService();
+
+        Assert.Throws<ArgumentNullException>(
+            () => service.AddPrerequisite(course, prerequisite, null!));
     }
 }

@@ -83,4 +83,46 @@ public class DiscountRuleTests
         Assert.Throws<ArgumentException>(
             () => new DiscountRule(id, new[] { course }, 10));
     }
+
+    /// <summary>
+    /// Verifies that a discount rule rejects a null course collection.
+    /// </summary>
+    [Fact]
+    public void DiscountRule_ShouldRejectNullCourses()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new DiscountRule(null!, 10m));
+    }
+
+    /// <summary>
+    /// Verifies that a discount rule rejects an empty course combination.
+    /// </summary>
+    [Fact]
+    public void DiscountRule_ShouldRejectEmptyCourseCombination()
+    {
+        Assert.Throws<ArgumentException>(
+            () => new DiscountRule(Array.Empty<Course>(), 10m));
+    }
+
+    /// <summary>
+    /// Verifies that a discount rule rejects a null course in its combination.
+    /// </summary>
+    [Fact]
+    public void DiscountRule_ShouldRejectNullCourse()
+    {
+        Assert.Throws<ArgumentException>(
+            () => new DiscountRule(new Course[] { null! }, 10m));
+    }
+
+    /// <summary>
+    /// Verifies that a discount rule rejects duplicate courses.
+    /// </summary>
+    [Fact]
+    public void DiscountRule_ShouldRejectDuplicateCourse()
+    {
+        var course = new Course("A", "Course A", 5, 100m, 500m);
+
+        Assert.Throws<ArgumentException>(
+            () => new DiscountRule(new[] { course, course }, 10m));
+    }
 }
