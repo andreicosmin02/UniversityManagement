@@ -135,6 +135,75 @@ public class Student
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="Student"/> class
+    /// with an existing persistent identifier.
+    /// </summary>
+    /// <param name="id">The persistent identifier.</param>
+    /// <param name="firstName">The student's first name.</param>
+    /// <param name="lastName">The student's last name.</param>
+    /// <param name="address">The student's address.</param>
+    /// <param name="cnp">The student's CNP.</param>
+    /// <param name="registrationNumber">The student's registration number.</param>
+    /// <param name="phoneNumbers">The student's phone numbers.</param>
+    /// <param name="emails">The student's email addresses.</param>
+    public Student(
+        int id,
+        string firstName,
+        string lastName,
+        string address,
+        string cnp,
+        string registrationNumber,
+        IEnumerable<string> phoneNumbers,
+        IEnumerable<string> emails)
+        : this(
+            firstName,
+            lastName,
+            address,
+            cnp,
+            registrationNumber,
+            phoneNumbers,
+            emails)
+    {
+        if (id <= 0)
+        {
+            throw new ArgumentException(
+                "Student identifier must be greater than zero.",
+                nameof(id));
+        }
+
+        this.Id = id;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Student"/> class for persistence.
+    /// </summary>
+    /// <param name="firstName">The student's first name.</param>
+    /// <param name="lastName">The student's last name.</param>
+    /// <param name="address">The student's address.</param>
+    /// <param name="cnp">The student's CNP.</param>
+    /// <param name="registrationNumber">The student's registration number.</param>
+    private Student(
+        string firstName,
+        string lastName,
+        string address,
+        string cnp,
+        string registrationNumber)
+    {
+        this.FirstName = firstName;
+        this.LastName = lastName;
+        this.Address = address;
+        this.Cnp = cnp;
+        this.RegistrationNumber = registrationNumber;
+        this.phoneNumbers = new List<string>();
+        this.emails = new List<string>();
+    }
+
+    /// <summary>
+    /// Gets the persistent identifier of the student.
+    /// </summary>
+    public int Id { get; private set; }
+
+    /// <summary>
     /// Gets the student's first name.
     /// </summary>
     public string FirstName { get; }

@@ -319,5 +319,62 @@ namespace UniversityManagement.Domain.Tests.Entities
                     Array.Empty<string>(),
                     new[] { "ion@example.com" }));
         }
+
+        /// <summary>
+        /// Verifies that a new student starts without a persistent identifier.
+        /// </summary>
+        [Fact]
+        public void Student_ShouldStartWithZeroId()
+        {
+            var student = new Student(
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "12345",
+                ["0722123456"],
+                []);
+
+            Assert.Equal(0, student.Id);
+        }
+
+        /// <summary>
+        /// Verifies that an existing student can store a persistent identifier.
+        /// </summary>
+        [Fact]
+        public void Student_ShouldStorePositiveId()
+        {
+            var student = new Student(
+                1,
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "12345",
+                ["0722123456"],
+                []);
+
+            Assert.Equal(1, student.Id);
+        }
+
+        /// <summary>
+        /// Verifies that an existing student cannot have a non-positive identifier.
+        /// </summary>
+        /// <param name="id">The invalid identifier to test.</param>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void Student_ShouldRejectNonPositiveId(int id)
+        {
+            Assert.Throws<ArgumentException>(() => new Student(
+                id,
+                "Ion",
+                "Popescu",
+                "Brasov",
+                "1234567890123",
+                "12345",
+                ["0722123456"],
+                []));
+        }
     }
 }

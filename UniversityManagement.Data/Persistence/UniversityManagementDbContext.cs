@@ -27,6 +27,11 @@ public class UniversityManagementDbContext : DbContext
     /// </summary>
     public DbSet<Course> Courses => this.Set<Course>();
 
+    /// <summary>
+    /// Gets the students stored in the database.
+    /// </summary>
+    public DbSet<Student> Students => this.Set<Student>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +48,35 @@ public class UniversityManagementDbContext : DbContext
             entity.Property(course => course.Cost);
 
             entity.Ignore(course => course.Prerequisites);
+        });
+
+        modelBuilder.Entity<Student>(entity =>
+        {
+            entity.HasKey(student => student.Id);
+
+            entity.Property(student => student.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(student => student.FirstName)
+                .IsRequired();
+
+            entity.Property(student => student.LastName)
+                .IsRequired();
+
+            entity.Property(student => student.Address)
+                .IsRequired();
+
+            entity.Property(student => student.Cnp)
+                .IsRequired();
+
+            entity.Property(student => student.RegistrationNumber)
+                .IsRequired();
+
+            entity.PrimitiveCollection(student => student.PhoneNumbers)
+                .HasField("phoneNumbers");
+
+            entity.PrimitiveCollection(student => student.Emails)
+                .HasField("emails");
         });
     }
 }
