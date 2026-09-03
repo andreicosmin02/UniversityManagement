@@ -58,6 +58,11 @@ public class UniversityManagementDbContext : DbContext
     /// </summary>
     public DbSet<Prerequisite> Prerequisites => this.Set<Prerequisite>();
 
+    /// <summary>
+    /// Gets the discount rules stored in the database.
+    /// </summary>
+    public DbSet<DiscountRule> DiscountRules => this.Set<DiscountRule>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -204,6 +209,23 @@ public class UniversityManagementDbContext : DbContext
                 .HasForeignKey("RequiredCourseId")
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DiscountRule>(entity =>
+        {
+            entity.HasKey(rule => rule.Id);
+
+            entity.Property(rule => rule.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(rule => rule.Percentage)
+                .IsRequired();
+
+            entity.HasMany(rule => rule.Courses)
+                .WithMany();
+
+            entity.Navigation(rule => rule.Courses)
+                .HasField("courses");
         });
     }
 }

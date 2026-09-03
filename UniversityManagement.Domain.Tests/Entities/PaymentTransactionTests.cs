@@ -61,18 +61,6 @@ public class PaymentTransactionTests
                 new DateTime(2026, 6, 1)));
     }
 
-    private static Student CreateStudent()
-    {
-        return new Student(
-            "Ion",
-            "Popescu",
-            "Brasov",
-            "1234567890123",
-            "S001",
-            new[] { "0722123456" },
-            Array.Empty<string>());
-    }
-
     /// <summary>
     /// Verifies that a new payment transaction starts without a persistent identifier.
     /// </summary>
@@ -144,5 +132,17 @@ public class PaymentTransactionTests
                 student,
                 500m,
                 new DateTime(2026, 6, 10)));
+    }
+
+    private static Student CreateStudent()
+    {
+        return new Student(
+            "Ion",
+            "Popescu",
+            "Brasov",
+            "1234567890123",
+            "S001",
+            new[] { "0722123456" },
+            Array.Empty<string>());
     }
 }

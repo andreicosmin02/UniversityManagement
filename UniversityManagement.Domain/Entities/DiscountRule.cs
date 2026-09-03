@@ -35,6 +35,42 @@ public class DiscountRule
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="DiscountRule"/> class
+    /// with an existing persistent identifier.
+    /// </summary>
+    /// <param name="id">The persistent identifier.</param>
+    /// <param name="courses">The courses included in the discount combination.</param>
+    /// <param name="percentage">The discount percentage.</param>
+    public DiscountRule(
+        int id,
+        IEnumerable<Course> courses,
+        decimal percentage)
+        : this(courses, percentage)
+    {
+        if (id <= 0)
+        {
+            throw new ArgumentException(
+                "Discount rule identifier must be greater than zero.",
+                nameof(id));
+        }
+
+        this.Id = id;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DiscountRule"/> class for persistence.
+    /// </summary>
+    private DiscountRule()
+    {
+        this.courses = new List<Course>();
+    }
+
+    /// <summary>
+    /// Gets the persistent identifier of the discount rule.
+    /// </summary>
+    public int Id { get; private set; }
+
+    /// <summary>
     /// Gets the courses required by the discount rule.
     /// </summary>
     public IReadOnlyCollection<Course> Courses => this.courses;
@@ -42,5 +78,5 @@ public class DiscountRule
     /// <summary>
     /// Gets the discount percentage.
     /// </summary>
-    public decimal Percentage { get; }
+    public decimal Percentage { get; private set; }
 }

@@ -42,4 +42,45 @@ public class DiscountRuleTests
         Assert.Throws<ArgumentOutOfRangeException>(
             () => new DiscountRule(new[] { course }, percentage));
     }
+
+    /// <summary>
+    /// Verifies that a new discount rule starts without a persistent identifier.
+    /// </summary>
+    [Fact]
+    public void DiscountRule_ShouldStartWithZeroId()
+    {
+        var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+        var rule = new DiscountRule(new[] { course }, 10);
+
+        Assert.Equal(0, rule.Id);
+    }
+
+    /// <summary>
+    /// Verifies that an existing discount rule can store a persistent identifier.
+    /// </summary>
+    [Fact]
+    public void DiscountRule_ShouldStorePositiveId()
+    {
+        var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+        var rule = new DiscountRule(1, new[] { course }, 10);
+
+        Assert.Equal(1, rule.Id);
+    }
+
+    /// <summary>
+    /// Verifies that an existing discount rule rejects a non-positive identifier.
+    /// </summary>
+    /// <param name="id">The invalid identifier to test.</param>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void DiscountRule_ShouldRejectNonPositiveId(int id)
+    {
+        var course = new Course("Math", "Mathematics", 5, 100, 500);
+
+        Assert.Throws<ArgumentException>(
+            () => new DiscountRule(id, new[] { course }, 10));
+    }
 }

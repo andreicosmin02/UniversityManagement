@@ -618,4 +618,59 @@ public class UniversityManagementDbContextTests
             context.Database.EnsureDeleted();
         }
     }
+
+    /// <summary>
+    /// Verifies that a discount rule and its courses are preserved by persistence.
+    /// </summary>
+    [Fact]
+    public void SaveChanges_ShouldPersistDiscountRule()
+    {
+        var databaseName = $"UniversityManagementTests_{Guid.NewGuid():N}";
+        var options = new DbContextOptionsBuilder<UniversityManagementDbContext>()
+            .UseSqlServer(
+                $"Server=localhost;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+
+        using var context = new UniversityManagementDbContext(options);
+
+        try
+        {
+            context.Database.EnsureCreated();
+
+            var firstCourse = new Course(
+                "Mathematics",
+                "Basic mathematics",
+                5,
+                100,
+                500);
+
+            var secondCourse = new Course(
+                "Programming",
+                "Basic programming",
+                6,
+                100,
+                600);
+
+            var rule = new DiscountRule(
+                new[] { firstCourse, secondCourse },
+                10);
+
+            context.DiscountRules.Add(rule);
+            context.SaveChanges();
+
+            context.ChangeTracker.Clear();
+
+            var storedRule = context.DiscountRules
+                .Include(item => item.Courses)
+                .Single();
+
+            Assert.True(rule.Id > 0);
+            Assert.Equal(10, storedRule.Percentage);
+            Assert.Equal(2, storedRule.Courses.Count);
+        }
+        finally
+        {
+            context.Database.EnsureDeleted();
+        }
+    }
 }
